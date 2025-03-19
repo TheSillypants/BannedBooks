@@ -1,0 +1,188 @@
+# Map of State Political Party in Power (2021)
+
+```{r echo=TRUE, fig.height=20, fig.width=15}
+
+data <- legis_2021 %>%
+  select(STATE, Leg.Control, Gov.Party, State.Control) %>%
+  rename(State = STATE, Legislature = Leg.Control, Governor = Gov.Party, StateControl = State.Control) %>%
+  mutate(State = tolower(State))
+
+states_map21 <- map_data("state")
+
+data_map21 <- states_map21 %>% 
+  left_join(data, by = c("region" = "State"))
+
+# Plot Legislative Control
+leg_plot <- ggplot(data_map21, aes(x = long, y = lat, group = group, fill = Legislature)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Split" = "purple")) +
+  ggtitle("Legislative Control (2021)")
+
+# Plot Governor's Party
+gov_plot <- ggplot(data_map21, aes(x = long, y = lat, group = group, fill = Governor)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red")) +
+  ggtitle("Governor's Party (2021)")
+
+# Plot State Control
+state_plot <- ggplot(data_map21, aes(x = long, y = lat, group = group, fill = StateControl)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Divided" = "gray")) +
+  ggtitle("State Control(2021)")
+
+
+
+state_plot / leg_plot / gov_plot
+
+```
+
+# Map of State Political Party (2022)
+
+```{r echo=TRUE, fig.height=15, fig.width=15}
+legis_2022 <- read.csv("legis_2022.csv")
+
+
+data22 <- legis_2022 %>%
+  select(STATE, Leg.Control, Gov.Party, State.Control) %>%
+  rename(State = STATE, Legislature = Leg.Control, Governor = Gov.Party, StateControl = State.Control) %>%
+  mutate(State = tolower(State))
+
+# Load US States Map
+states_map22 <- map_data("state")
+
+# Merge Data with Map
+data_map22 <- states_map22 %>%
+  left_join(data22, by = c("region" = "State"))
+
+# Plot Legislative Control
+leg_plot22 <- ggplot(data_map22, aes(x = long, y = lat, group = group, fill = Legislature)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Split" = "purple")) +
+  ggtitle("Legislative Control(2022)")
+
+# Plot Governor's Party
+gov_plot22 <- ggplot(data_map22, aes(x = long, y = lat, group = group, fill = Governor)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red")) +
+  ggtitle("Governor's Party (2022)")
+
+# Plot State Control
+state_plot22 <- ggplot(data_map22, aes(x = long, y = lat, group = group, fill = StateControl)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Divided" = "gray")) +
+  ggtitle("State Control (2022)")
+
+
+
+
+gov_plot22 / state_plot22 / leg_plot22
+```
+
+# Map of State Political Party (2023)
+
+```{r echo=TRUE, fig.height=15, fig.width=15}
+legis_2023 <- read.csv("legis_2023.csv")
+
+data23 <- legis_2023 %>%
+  select(STATE, Leg.Control, Gov.Party, State.Control) %>%
+  rename(State = STATE, Legislature = Leg.Control, Governor = Gov.Party, StateControl = State.Control) %>%
+  mutate(State = tolower(State))
+
+# Load US States Map
+states_map23 <- map_data("state")
+
+# Merge Data with Map
+data_map23 <- states_map23 %>%
+  left_join(data23, by = c("region" = "State"))
+
+# Plot Legislative Control
+leg_plot23 <- ggplot(data_map23, aes(x = long, y = lat, group = group, fill = Legislature)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Split" = "purple")) +
+  ggtitle("Legislative Control(2023)")
+
+# Plot Governor's Party
+gov_plot23 <- ggplot(data_map23, aes(x = long, y = lat, group = group, fill = Governor)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red")) +
+  ggtitle("Governor's Party  (2023)")
+
+# Plot State Control
+state_plot23 <- ggplot(data_map23, aes(x = long, y = lat, group = group, fill = StateControl)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Divided" = "gray")) +
+  ggtitle("State Control (2023)")
+
+
+
+
+leg_plot23 / gov_plot23 / state_plot23
+```
+
+
+
+
+
+# Map for 2024
+
+```{r echo=TRUE, fig.height=15, fig.width=15}
+legis_2024 <- read.csv("legis_2024.csv")
+
+data24 <- legis_2024 %>%
+  select(STATE, Leg.Control, Gov.Party, State.Control) %>%
+  rename(State = STATE, Legislature = Leg.Control, Governor = Gov.Party, StateControl = State.Control) %>%
+  mutate(State = tolower(State))
+
+# Load US States Map
+states_map24 <- map_data("state")
+
+# Merge Data with Map
+data_map24 <- states_map24 %>%
+  left_join(data24, by = c("region" = "State"))
+
+# Plot Legislative Control
+leg_plot24 <- ggplot(data_map24, aes(x = long, y = lat, group = group, fill = Legislature)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Split" = "purple")) +
+  ggtitle("Legislative Control (2024)")
+
+# Plot Governor's Party
+gov_plot24 <- ggplot(data_map24, aes(x = long, y = lat, group = group, fill = Governor)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red")) +
+  ggtitle("Governor's Party (2024)")
+
+# Plot State Control
+state_plot24 <- ggplot(data_map24, aes(x = long, y = lat, group = group, fill = StateControl)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Divided" = "gray")) +
+  ggtitle("State Control (2024)")
+
+
+leg_plot24 / gov_plot24 / state_plot24
+
+```
