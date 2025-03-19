@@ -1,0 +1,53 @@
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+
+# Define file paths and years
+years <- c("2021", "2022", "2023", "2024")
+file_paths <- c("Legis_2021.csv", "Legis_2022.csv", "Legis_2023.csv", "Legis_2024.csv")
+
+# Read and combine datasets
+df_list <- lapply(1:length(years), function(i) {
+  df <- read_csv(file_paths[i])
+  df$Year <- as.integer(years[i])  
+  df
+})
+
+df_combined <- bind_rows(df_list)
+
+# Standardize column names
+colnames(df_combined) <- gsub("\n", " ", colnames(df_combined))  
+colnames(df_combined) <- gsub(" +", " ", colnames(df_combined))  
+colnames(df_combined) <- trimws(colnames(df_combined))
+
+# Select relevant columns
+df_politics <- df_combined %>%
+  select(Year, STATE, Leg.Control, Gov.Party, State.Control) %>%
+    rename(`Party in Legislature` = Leg.Control,
+         `Governorship Party` = Gov.Party,
+         `State Control` = State.Control)
+
+# Reshape data for visualization
+df_long <- df_politics %>%
+  pivot_longer(cols = c(`Party in Legislature`, `Governorship Party`, `State Control`),
+               names_to = "Control_Type", values_to = "Party")
+
+
+# Filter only relevant political categories
+df_long <- df_long %>%
+  filter(Party %in% c("Dem", "Rep", "Divided", NA)) %>% 
+  mutate(Party = ifelse(is.na(Party), "N/A", Party))  # Convert NA to "N/A"
+
+# Plot the trends in political control
+ggplot(df_long, aes(x = factor(Year), fill = Party)) +
+  geom_bar(position = "fill") +
+  facet_wrap(~Control_Type) +
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Divided" = "purple", "N/A" = "gray")) +
+  labs(title = "Trends in Political Control Across States (2021-2024)",
+       x = "Year", y = "Proportion of States", fill = "Party") +
+  theme_minimal()
+
+```
