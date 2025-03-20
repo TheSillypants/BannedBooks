@@ -1,0 +1,47 @@
+remotes::install_github("wmurphyrd/fiftystater")
+library(fiftystater)
+library(ggplot2)
+library(dplyr)
+library(readr)
+
+# Define file paths and years
+years <- c("2021", "2022", "2023", "2024")
+file_paths <- c("Legis_2021.csv", "Legis_2022.csv", "Legis_2023.csv", "Legis_2024.csv")
+
+# Read and process datasets
+df_list <- lapply(1:length(years), function(i) {
+  df <- read_csv(file_paths[i], show_col_types = FALSE)  # Load data
+  df$Year <- as.integer(years[i])  # Add Year column
+  df <- df %>%
+    select(STATE, Leg.Control, Gov.Party, State.Control, Year) %>%  # Ensure Year is included
+    rename(State = STATE, Legislature = Leg.Control, Governor = Gov.Party, StateControl = State.Control) %>%
+    mutate(State = tolower(State))  # Convert to lowercase for merging
+  df
+})
+
+df_combined <- bind_rows(df_list)  # Merge all years
+
+# Use fiftystater map
+plot_map <- function(year, control_type, title, colors) {
+  # Filter data for a specific year before joining
+  df_year <- df_combined %>% filter(Year == year)  
+  data_map <- fifty_states %>% left_join(df_year, by = c("id" = "State"))  # Join data with the map
+
+  ggplot(data_map, aes(x = long, y = lat, group = group, fill = !!sym(control_type))) +
+    geom_polygon(color = "white") +
+    coord_map() +  # Ensures proper map projection
+    theme_void() +
+    theme(legend.position = "bottom") +
+    scale_fill_manual(values = colors, na.value = "gray") +  # Fill missing values with gray
+    ggtitle(paste(title, "(", year, ")", sep = ""))
+}
+
+# Define colors
+party_colors <- c("Dem" = "blue", "Rep" = "red", "Divided" = "purple", "Split" = "purple", "N/A" = "gray")
+
+# Generate maps for each year
+for (year in years) {
+  print(plot_map(year, "Legislature", "Legislative Control", party_colors))
+  print(plot_map(year, "Governor", "Governor's Party", party_colors))
+  print(plot_map(year, "StateControl", "State Control", party_colors))
+}
