@@ -51,3 +51,66 @@ ggplot(df_long, aes(x = factor(Year), fill = Party)) +
   theme_minimal()
 
 ```
+
+# Changes in Party Control Across States 
+
+```{r echo=TRUE, fig.height=8, fig.width=25}
+
+# Define file paths and years
+years <- c("2021", "2022", "2023", "2024")
+file_paths <- c("Legis_2021.csv", "Legis_2022.csv", "Legis_2023.csv", "Legis_2024.csv")
+
+# Read and combine datasets
+df_list <- lapply(1:length(years), function(i) {
+  df <- read_csv(file_paths[i])
+  df$Year <- as.integer(years[i])  # Add Year column
+  df
+})
+
+df_combined <- bind_rows(df_list)
+
+# Standardize column names
+colnames(df_combined) <- gsub("\n", " ", colnames(df_combined))  
+colnames(df_combined) <- gsub(" +", " ", colnames(df_combined))  
+colnames(df_combined) <- trimws(colnames(df_combined))
+
+
+# Select relevant columns and rename them for clarity
+df_politics <- df_combined %>%
+  select(Year, STATE, Leg.Control, Gov.Party, State.Control) %>%
+  rename(`Party in Legislature` = Leg.Control,
+         `Governorship Party` = Gov.Party,
+         `State Control` = State.Control)
+
+# Ensure all states appear in all years, filling missing values with "N/A"
+df_politics <- df_politics %>%
+  complete(Year, STATE, fill = list(`Party in Legislature` = "N/A", 
+                                    `Governorship Party` = "N/A", 
+                                    `State Control` = "N/A"))
+
+
+# Reshape data for visualization
+df_long <- df_politics %>%
+  pivot_longer(cols = c(`Party in Legislature`, `Governorship Party`, `State Control`),
+               names_to = "Control_Type", values_to = "Party")
+
+# Filter only relevant political categories
+df_long <- df_long %>%
+  filter(Party %in% c("Dem", "Rep", "Divided", NA)) %>% 
+  mutate(Party = ifelse(is.na(Party), "N/A", Party))  # Convert NA to "N/A"
+
+# Ensure "N/A" is included before filtering
+df_long <- df_long %>%
+  filter(Party %in% c("Dem", "Rep", "Divided", "N/A"))
+
+# Create a visualization for changes in party control per state
+ggplot(df_long, aes(x = Year, y = STATE, fill = Party, label = STATE)) +
+  geom_tile(color = "white", size = 0.3) +  # Creates a heatmap-style visualization
+  geom_text(aes(label = Party), size = 3, color = "black") +  # Labels each state with its party control
+  facet_wrap(~Control_Type) +  # Facet by legislature, governorship, and state control
+  scale_fill_manual(values = c("Dem" = "blue", "Rep" = "red", "Divided" = "purple", "N/A" = "gray")) +
+  labs(title = "Changes in Party Control Across States (2021-2024)",
+       x = "Year", y = "State", fill = "Party") +
+  theme_minimal()
+
+```
