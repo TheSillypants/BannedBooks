@@ -114,3 +114,67 @@ ggplot(df_long, aes(x = Year, y = STATE, fill = Party, label = STATE)) +
   theme_minimal()
 
 ```
+
+# State Legislative Composition by Party (Senate + House) stacked bar chart 
+
+```{r echo=TRUE, fig.height=15, fig.width=15}
+data_2021 <- read_csv("Legis_2021.csv") %>% mutate(Year = 2021)
+data_2022 <- read_csv("Legis_2022.csv") %>% mutate(Year = 2022)
+data_2023 <- read_csv("Legis_2023.csv") %>% mutate(Year = 2023)
+data_2024 <- read_csv("Legis_2024.csv") %>% mutate(Year = 2024)
+
+data_combined_years <- bind_rows(data_2021, data_2022, data_2023, data_2024)
+
+# Clean and select relevant columns
+data_cleaned_short <- data_combined_years %>%
+  rename(
+    State = STATE,
+    Senate_Dem = `Senate.Dem`,
+    Senate_Rep = `Senate.Rep`,
+    House_Dem = `House.Dem`,
+    House_Rep = `House.Rep`
+  ) %>%
+  mutate(
+    Senate_Dem = parse_number(as.character(Senate_Dem)),
+    Senate_Rep = parse_number(as.character(Senate_Rep)),
+    House_Dem  = parse_number(as.character(House_Dem)),
+    House_Rep  = parse_number(as.character(House_Rep))
+  ) %>%
+  rowwise() %>%
+  mutate(
+    Dem_Total = sum(c(Senate_Dem, House_Dem), na.rm = TRUE),
+    Rep_Total = sum(c(Senate_Rep, House_Rep), na.rm = TRUE),
+    Nonpartisan = if_else(State == "Nebraska", 49, 0)  # Nebraska gets 49 gray seats
+  ) %>%
+  ungroup() %>%
+  select(State, Year, Dem_Total, Rep_Total, Nonpartisan) %>%
+  filter(!State %in% c("Total", "Total States", NA))  # remove non-state rows
+
+# Long format 
+data_long <- data_cleaned_short %>%
+  pivot_longer(cols = c(Dem_Total, Rep_Total, Nonpartisan), names_to = "Party", values_to = "Seats") %>%
+  mutate(
+    Party = recode(Party,
+                   "Dem_Total" = "Democrat",
+                   "Rep_Total" = "Republican",
+                   "Nonpartisan" = "Nonpartisan")
+  )
+
+# Stacked bar chart
+ggplot(data_long, aes(x = reorder(State, Seats), y = Seats, fill = Party)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ Year) +
+  coord_flip() +
+  scale_fill_manual(values = c(
+    "Democrat" = "#619CFF",
+    "Republican" = "#F8766D",
+    "Nonpartisan" = "gray60"
+  )) +
+  labs(
+    title = "State Legislative Composition by Party (Senate + House)",
+    x = "State",
+    y = "Total Seats",
+    fill = "Party"
+  ) +
+  theme_minimal()
+```
