@@ -1,7 +1,4 @@
-﻿2024 State & Legislative Partisan Composition,,,,,,,,,,"This presumes all current leads
-in uncalled races hold. The results on the table are unofficial.",,
-,,,,,,,9-Dec-24,,,,,
-STATE,Total Seats,Total Senate,Senate Dem.,Senate Rep.,Senate other,Total House,House Dem.,House Rep.,House other,Leg. Control,Gov. Party,State Control
+﻿STATE,Total Seats,Total Senate,Senate.Dem,Senate.Rep,Senate other,Total House,House.Dem,House.Rep,House other,Leg.Control,Gov.Party,State.Control
 Alabama,140,35,8,27,,105,29,76,,Rep,Rep,Rep
 Alaska,60,20,9,11,,40,14,21,5,Rep,Rep,Rep
 Arizona,90,30,13,17,,60,27,33,,Rep,Dem,Divided
@@ -57,11 +54,3 @@ Total States,7386,1973,824,1098,51,5413,2403,2992,18,"28R, 18D,
 23D","23R,
 15D,
 11 Div."
-U.S. Territories,Total Seats,Total Senate,Senate Dem.,Senate Rep.,Senate other,Total House,House Dem.,House Rep.,House Other,Leg. Control,Gov. Party,
-American Samoa,39,18,Non-partisan,,18,21,Non-partisan,,21,N/A,Dem,N/A
-District of Columbia,13,13,11,0,2,Unicameral,,,,Dem,N/A,N/A
-Guam,15,15,7,8,,Unicameral,,,,Rep,Dem,Divided
-Mariana Islands,29,9,2,4,3,20,4,3,13,Divided,Ind,Divided
-Puerto Rico,78,27,8 PDP,17 NPP,2,51,19 PDP,28 NPP,4,NPP,NPP,NPP
-Virgin Islands,15,15,0,0,15,Unicameral - nonpartisan,,,,N/A,Dem,N/A
-National Conference of State Legislatures,,,"(Abbreviations: vacancy, undecided, recall, Covenant Party,New Progressive Party, Popular Democratic Party)",,,,,,,,,

@@ -1,78 +1,61 @@
-﻿2022 State & Legislative Partisan Composition,,,,,,2-Feb-22,,,,,,,,
-STATE,"Total
+﻿STATE,"Total
 Seats","Total
-Senate","Senate
-Dem.","Senate
-Rep.","Senate
-other",,"Total
-House","House
-Dem.","House
-Rep.","House
-other","Leg.
-Control","Gov.
-Party","State
-Control",
-Alabama,140,35,8,27,,,105,28,75,2v,Rep,Rep,Rep,
-Alaska,60,20,7,13,,,40,15,21,4,Rep,Rep,Rep,
-Arizona,90,30,14,16,,,60,29,31,,Rep,Rep,Rep,
-Arkansas,135,35,7,26,"1, 1v",,100,22,78,,Rep,Rep,Rep,
-California,120,40,31,9,,,80,56,19,"1, 4v",Dem,Dem,Dem,
-Colorado,100,35,20,15,,,65,41,24,,Dem,Dem,Dem,
-Connecticut,187,36,23,13,,,151,95,53,3v,Dem,Dem,Dem,
-Delaware,62,21,14,7,,,41,26,15,,Dem,Dem,Dem,
-Florida,160,40,15,24,1v,,120,40,78,2v,Rep,Rep,Rep,
-Georgia,236,56,22,34,,,180,77,103,,Rep,Rep,Rep,
-Hawaii,76,25,24,1,,,51,47,4,,Dem,Dem,Dem,
-Idaho,105,35,6,28,1v,,70,12,58,,Rep,Rep,Rep,
-Illinois,177,59,41,18,,,118,72,45,1v,Dem,Dem,Dem,
-Indiana,150,50,11,38,1v,,100,29,71,,Rep,Rep,Rep,
-Iowa,150,50,18,31,1v,,100,40,60,,Rep,Rep,Rep,
-Kansas,165,40,11,29,,,125,39,85,1v,Rep,Dem,Divided,
-Kentucky,138,38,8,30,,,100,25,75,,Rep,Dem,Divided,
-Louisiana,144,39,12,26,1v,,105,33,68,"2, 2v",Rep,Dem,Divided,
-Maine,186,35,22,13,,,151,79,66,"5, 1v",Dem,Dem,Dem,
-Maryland,188,47,32,15,,,141,98,42,1v,Dem,Rep,Divided,
-Massachusetts,200,40,36,3,1v,,160,129,29,"1, 1v",Dem,Rep,Divided,
-Michigan,148,38,16,22,,,110,52,56,2v,Rep,Dem,Divided,
-Minnesota,201,67,31,34,2,,134,70,64,,Divided,Dem,Divided,
-Mississippi,174,52,15,36,1v,,122,46,75,1,Rep,Rep,Rep,
-Missouri,197,34,10,24,,,163,49,112,2v,Rep,Rep,Rep,
-Montana,150,50,19,31,,,100,33,67,,Rep,Rep,Rep,
-Nebraska,49,49,,,49,,eral - nonpartisan,,,,N/A,Rep,N/A,
-Nevada,63,21,11,9,1v,,42,26,16,,Dem,Dem,Dem,
-New Hampshire,424,24,10,14,,,400,188,207,"1, 4v",Rep,Rep,Rep,
-New Jersey,120,40,24,16,,,80,46,34,,Dem,Dem,Dem,
-New Mexico,112,42,26,15,1,,70,44,24,"1, 1v",Dem,Dem,Dem,
-New York,213,63,43,20,,,150,104,43,"1, 2v",Dem,Dem,Dem,
-North Carolina,170,50,22,28,,,120,51,69,,Rep,Dem,Divided,
-North Dakota,141,47,7,40,,,94,14,80,,Rep,Rep,Rep,
-Ohio,132,33,8,25,,,99,34,64,1v,Rep,Rep,Rep,
-Oklahoma,149,48,9,39,,,101,18,82,1v,Rep,Rep,Rep,
-Oregon,90,30,18,11,1,,60,37,22,1v,Dem,Dem,Dem,
-Pennsylvania,253,50,21,28,1,,203,88,112,3v,Rep,Dem,Divided,
-Rhode Island,113,38,33,5,,,75,65,10,,Dem,Dem,Dem,
-South Carolina,170,46,16,29,1v,,124,43,79,2v,Rep,Rep,Rep,
-South Dakota,105,35,3,32,,,70,8,62,,Rep,Rep,Rep,
-Tennessee,132,33,5,27,1v,,99,26,73,,Rep,Rep,Rep,
-Texas,181,31,13,18,,,150,64,85,1v,Rep,Rep,Rep,
-Utah,104,29,6,23,,,75,17,58,,Rep,Rep,Rep,
-Vermont,180,30,21,7,2,,150,95,43,12,Dem,Rep,Divided,
-Virginia,140,40,21,19,,,100,48,52,,Divided,Rep,Divided,
-Washington,147,49,29,20,,,98,57,41,,Dem,Dem,Dem,
-West Virginia,134,34,11,23,,,100,22,78,,Rep,Rep,Rep,
-Wisconsin,132,33,12,21,,,99,38,61,,Rep,Dem,Divided,
-Wyoming,90,30,2,28,,,60,7,51,2,Rep,Rep,Rep,
-Total States,7383,1972,844,1060,"57, 11v",,5411,2422,2920,"31, 38v","30R, 17D,
+Senate",Senate.Dem,Senate.Rep,"Senate
+other","Total
+House",House.Dem,House.Rep,"House
+other",Leg.Control,Gov.Party,State.Control
+Alabama,140,35,8,27,,105,28,75,2v,Rep,Rep,Rep
+Alaska,60,20,7,13,,40,15,21,4,Rep,Rep,Rep
+Arizona,90,30,14,16,,60,29,31,,Rep,Rep,Rep
+Arkansas,135,35,7,26,"1, 1v",100,22,78,,Rep,Rep,Rep
+California,120,40,31,9,,80,56,19,"1, 4v",Dem,Dem,Dem
+Colorado,100,35,20,15,,65,41,24,,Dem,Dem,Dem
+Connecticut,187,36,23,13,,151,95,53,3v,Dem,Dem,Dem
+Delaware,62,21,14,7,,41,26,15,,Dem,Dem,Dem
+Florida,160,40,15,24,1v,120,40,78,2v,Rep,Rep,Rep
+Georgia,236,56,22,34,,180,77,103,,Rep,Rep,Rep
+Hawaii,76,25,24,1,,51,47,4,,Dem,Dem,Dem
+Idaho,105,35,6,28,1v,70,12,58,,Rep,Rep,Rep
+Illinois,177,59,41,18,,118,72,45,1v,Dem,Dem,Dem
+Indiana,150,50,11,38,1v,100,29,71,,Rep,Rep,Rep
+Iowa,150,50,18,31,1v,100,40,60,,Rep,Rep,Rep
+Kansas,165,40,11,29,,125,39,85,1v,Rep,Dem,Divided
+Kentucky,138,38,8,30,,100,25,75,,Rep,Dem,Divided
+Louisiana,144,39,12,26,1v,105,33,68,"2, 2v",Rep,Dem,Divided
+Maine,186,35,22,13,,151,79,66,"5, 1v",Dem,Dem,Dem
+Maryland,188,47,32,15,,141,98,42,1v,Dem,Rep,Divided
+Massachusetts,200,40,36,3,1v,160,129,29,"1, 1v",Dem,Rep,Divided
+Michigan,148,38,16,22,,110,52,56,2v,Rep,Dem,Divided
+Minnesota,201,67,31,34,2,134,70,64,,Divided,Dem,Divided
+Mississippi,174,52,15,36,1v,122,46,75,1,Rep,Rep,Rep
+Missouri,197,34,10,24,,163,49,112,2v,Rep,Rep,Rep
+Montana,150,50,19,31,,100,33,67,,Rep,Rep,Rep
+Nebraska,49,49,,,49,eral - nonpartisan,,,,N/A,Rep,N/A
+Nevada,63,21,11,9,1v,42,26,16,,Dem,Dem,Dem
+New Hampshire,424,24,10,14,,400,188,207,"1, 4v",Rep,Rep,Rep
+New Jersey,120,40,24,16,,80,46,34,,Dem,Dem,Dem
+New Mexico,112,42,26,15,1,70,44,24,"1, 1v",Dem,Dem,Dem
+New York,213,63,43,20,,150,104,43,"1, 2v",Dem,Dem,Dem
+North Carolina,170,50,22,28,,120,51,69,,Rep,Dem,Divided
+North Dakota,141,47,7,40,,94,14,80,,Rep,Rep,Rep
+Ohio,132,33,8,25,,99,34,64,1v,Rep,Rep,Rep
+Oklahoma,149,48,9,39,,101,18,82,1v,Rep,Rep,Rep
+Oregon,90,30,18,11,1,60,37,22,1v,Dem,Dem,Dem
+Pennsylvania,253,50,21,28,1,203,88,112,3v,Rep,Dem,Divided
+Rhode Island,113,38,33,5,,75,65,10,,Dem,Dem,Dem
+South Carolina,170,46,16,29,1v,124,43,79,2v,Rep,Rep,Rep
+South Dakota,105,35,3,32,,70,8,62,,Rep,Rep,Rep
+Tennessee,132,33,5,27,1v,99,26,73,,Rep,Rep,Rep
+Texas,181,31,13,18,,150,64,85,1v,Rep,Rep,Rep
+Utah,104,29,6,23,,75,17,58,,Rep,Rep,Rep
+Vermont,180,30,21,7,2,150,95,43,12,Dem,Rep,Divided
+Virginia,140,40,21,19,,100,48,52,,Divided,Rep,Divided
+Washington,147,49,29,20,,98,57,41,,Dem,Dem,Dem
+West Virginia,134,34,11,23,,100,22,78,,Rep,Rep,Rep
+Wisconsin,132,33,12,21,,99,38,61,,Rep,Dem,Divided
+Wyoming,90,30,2,28,,60,7,51,2,Rep,Rep,Rep
+Total States,7383,1972,844,1060,"57, 11v",5411,2422,2920,"31, 38v","30R, 17D,
 2 Div.","28R,
 22D","23R,
 14D,
-12 Div.",
-U.S. Territories,Total Seats,Total Senate,Senate Dem.,Senate Rep.,Senate other,,Total House,House Dem.,House Rep.,,,"Gov.
-Party",,
-American Samoa,39,18,Non-partisan,,,,21,Non-partisan,,,,Dem,,
-District of Columbia,13,13,11,0,2,,Unicameral,,,,,N/A,,
-Guam,15,15,8,7,,,Unicameral,,,,,Dem,,
-Mariana Islands,29,9,1,5,3,,20,8,8,"3, 1v",Divided,Rep,Divided,
-Puerto Rico,78,27,12 PDP,10 NPP,5,,51,26 PDP,21 NPP,4,PDP,NPP,Divided,
-Virgin Islands,15,15,9,0,6,,Unicameral - nonpartisan,,,,Dem,Dem,Dem,
-"National Conference of State Legislatures      (Abbreviations: vacancy, undecided, recall, Covenant Party,New Progressive Party, Popular Democratic Party)",,,,,,,,,,,,,,
+12 Div."

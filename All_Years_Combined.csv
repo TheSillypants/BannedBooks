@@ -1,0 +1,205 @@
+,STATE,Total.Seats,"Total.Senate
+",Senate.Dem,Senate.Rep,"Senate
+other","Total
+House",House.Dem,House.Rep,"House
+other",Leg.Control,Gov.Party,State.Control,Year
+0,Alabama,140,35,7,26,2v,105,28,77,,Rep,Rep,Rep,2021
+1,Alaska,60,20,7,13,,40,15,21,4,Rep,Rep,Rep,2021
+2,Arizona,90,30,14,16,,60,28,31,1v,Rep,Rep,Rep,2021
+3,Arkansas,135,35,7,27,1,100,22,78,,Rep,Rep,Rep,2021
+4,California,120,40,30,9,1v,80,60,19,1,Dem,Dem,Dem,2021
+5,Colorado,100,35,20,15,,65,41,24,,Dem,Dem,Dem,2021
+6,Connecticut,187,36,23,12,1v,151,97,54,,Dem,Dem,Dem,2021
+7,Delaware,62,21,14,7,,41,26,15,,Dem,Dem,Dem,2021
+8,Florida,160,40,16,24,,120,42,78,,Rep,Rep,Rep,2021
+9,Georgia,236,56,22,34,,180,76,103,1v,Rep,Rep,Rep,2021
+10,Hawaii,76,25,24,1,,51,47,4,,Dem,Dem,Dem,2021
+11,Idaho,105,35,7,28,,70,12,58,,Rep,Rep,Rep,2021
+12,Illinois,177,59,41,18,,118,73,45,,Dem,Dem,Dem,2021
+13,Indiana,150,50,11,39,,100,29,71,,Rep,Rep,Rep,2021
+14,Iowa,150,50,18,32,,100,41,59,,Rep,Rep,Rep,2021
+15,Kansas,165,40,11,29,,125,41,84,,Rep,Dem,Divided,2021
+16,Kentucky,138,38,8,30,,100,25,75,,Rep,Dem,Divided,2021
+17,Louisiana,144,39,12,27,,105,35,67,"2, 1v",Rep,Dem,Divided,2021
+18,Maine,186,35,21,13,1v,151,80,66,5,Dem,Dem,Dem,2021
+19,Maryland,188,47,32,15,,141,99,42,,Dem,Rep,Divided,2021
+20,Massachusetts,200,40,37,3,,160,128,30,"1, 1v",Dem,Rep,Divided,2021
+21,Michigan,148,38,16,22,,110,52,58,,Rep,Dem,Divided,2021
+22,Minnesota,201,67,31,34,2,134,70,64,,Divided,Dem,Divided,2021
+23,Mississippi,174,52,16,36,,122,46,75,1,Rep,Rep,Rep,2021
+24,Missouri,197,34,10,24,,163,48,114,1v,Rep,Rep,Rep,2021
+25,Montana,150,50,19,31,,100,33,67,,Rep,Rep,Rep,2021
+26,Nebraska,49,49,,,49,eral - nonpartisan,,,,,Rep,,2021
+27,Nevada,63,21,12,9,,42,26,16,,Dem,Dem,Dem,2021
+28,New Hampshire,424,24,10,14,,400,187,213,,Rep,Rep,Rep,2021
+29,New Jersey,120,40,25,15,,80,52,28,,Dem,Dem,Dem,2021
+30,New Mexico,112,42,27,15,,70,45,24,1,Dem,Dem,Dem,2021
+31,New York,213,63,43,20,,150,106,43,1,Dem,Dem,Dem,2021
+32,North Carolina,170,50,22,28,,120,51,69,,Rep,Dem,Divided,2021
+33,North Dakota,141,47,7,40,,94,14,80,,Rep,Rep,Rep,2021
+34,Ohio,132,33,8,25,,99,35,64,,Rep,Rep,Rep,2021
+35,Oklahoma,149,48,9,39,,101,19,82,,Rep,Rep,Rep,2021
+36,Oregon,90,30,18,11,1,60,37,23,,Dem,Dem,Dem,2021
+37,Pennsylvania,253,50,21,27,"1, 1v",203,90,112,1v,Rep,Dem,Divided,2021
+38,Rhode Island,113,38,33,5,,75,65,10,,Dem,Dem,Dem,2021
+39,South Carolina,170,46,16,30,,124,43,81,,Rep,Rep,Rep,2021
+40,South Dakota,105,35,3,32,,70,8,62,,Rep,Rep,Rep,2021
+41,Tennessee,132,33,6,27,,99,26,73,,Rep,Rep,Rep,2021
+42,Texas,181,31,12,19,,150,67,82,1v,Rep,Rep,Rep,2021
+43,Utah,104,29,6,23,,75,17,58,,Rep,Rep,Rep,2021
+44,Vermont,180,30,21,7,2,150,93,46,11,Dem,Rep,Divided,2021
+45,Virginia,140,40,21,18,1v,100,55,45,,Dem,Dem,Dem,2021
+46,Washington,147,49,29,20,,98,57,41,,Dem,Dem,Dem,2021
+47,West Virginia,134,34,11,23,,100,23,77,,Rep,Rep,Rep,2021
+48,Wisconsin,132,33,12,20,1v,99,38,60,1v,Rep,Dem,Divided,2021
+49,Wyoming,90,30,2,28,,60,7,51,2,Rep,Rep,Rep,2021
+0,Alabama,140,35,8,27,,105,28,75,2v,Rep,Rep,Rep,2022
+1,Alaska,60,20,7,13,,40,15,21,4,Rep,Rep,Rep,2022
+2,Arizona,90,30,14,16,,60,29,31,,Rep,Rep,Rep,2022
+3,Arkansas,135,35,7,26,"1, 1v",100,22,78,,Rep,Rep,Rep,2022
+4,California,120,40,31,9,,80,56,19,"1, 4v",Dem,Dem,Dem,2022
+5,Colorado,100,35,20,15,,65,41,24,,Dem,Dem,Dem,2022
+6,Connecticut,187,36,23,13,,151,95,53,3v,Dem,Dem,Dem,2022
+7,Delaware,62,21,14,7,,41,26,15,,Dem,Dem,Dem,2022
+8,Florida,160,40,15,24,1v,120,40,78,2v,Rep,Rep,Rep,2022
+9,Georgia,236,56,22,34,,180,77,103,,Rep,Rep,Rep,2022
+10,Hawaii,76,25,24,1,,51,47,4,,Dem,Dem,Dem,2022
+11,Idaho,105,35,6,28,1v,70,12,58,,Rep,Rep,Rep,2022
+12,Illinois,177,59,41,18,,118,72,45,1v,Dem,Dem,Dem,2022
+13,Indiana,150,50,11,38,1v,100,29,71,,Rep,Rep,Rep,2022
+14,Iowa,150,50,18,31,1v,100,40,60,,Rep,Rep,Rep,2022
+15,Kansas,165,40,11,29,,125,39,85,1v,Rep,Dem,Divided,2022
+16,Kentucky,138,38,8,30,,100,25,75,,Rep,Dem,Divided,2022
+17,Louisiana,144,39,12,26,1v,105,33,68,"2, 2v",Rep,Dem,Divided,2022
+18,Maine,186,35,22,13,,151,79,66,"5, 1v",Dem,Dem,Dem,2022
+19,Maryland,188,47,32,15,,141,98,42,1v,Dem,Rep,Divided,2022
+20,Massachusetts,200,40,36,3,1v,160,129,29,"1, 1v",Dem,Rep,Divided,2022
+21,Michigan,148,38,16,22,,110,52,56,2v,Rep,Dem,Divided,2022
+22,Minnesota,201,67,31,34,2,134,70,64,,Divided,Dem,Divided,2022
+23,Mississippi,174,52,15,36,1v,122,46,75,1,Rep,Rep,Rep,2022
+24,Missouri,197,34,10,24,,163,49,112,2v,Rep,Rep,Rep,2022
+25,Montana,150,50,19,31,,100,33,67,,Rep,Rep,Rep,2022
+26,Nebraska,49,49,,,49,eral - nonpartisan,,,,,Rep,,2022
+27,Nevada,63,21,11,9,1v,42,26,16,,Dem,Dem,Dem,2022
+28,New Hampshire,424,24,10,14,,400,188,207,"1, 4v",Rep,Rep,Rep,2022
+29,New Jersey,120,40,24,16,,80,46,34,,Dem,Dem,Dem,2022
+30,New Mexico,112,42,26,15,1,70,44,24,"1, 1v",Dem,Dem,Dem,2022
+31,New York,213,63,43,20,,150,104,43,"1, 2v",Dem,Dem,Dem,2022
+32,North Carolina,170,50,22,28,,120,51,69,,Rep,Dem,Divided,2022
+33,North Dakota,141,47,7,40,,94,14,80,,Rep,Rep,Rep,2022
+34,Ohio,132,33,8,25,,99,34,64,1v,Rep,Rep,Rep,2022
+35,Oklahoma,149,48,9,39,,101,18,82,1v,Rep,Rep,Rep,2022
+36,Oregon,90,30,18,11,1,60,37,22,1v,Dem,Dem,Dem,2022
+37,Pennsylvania,253,50,21,28,1,203,88,112,3v,Rep,Dem,Divided,2022
+38,Rhode Island,113,38,33,5,,75,65,10,,Dem,Dem,Dem,2022
+39,South Carolina,170,46,16,29,1v,124,43,79,2v,Rep,Rep,Rep,2022
+40,South Dakota,105,35,3,32,,70,8,62,,Rep,Rep,Rep,2022
+41,Tennessee,132,33,5,27,1v,99,26,73,,Rep,Rep,Rep,2022
+42,Texas,181,31,13,18,,150,64,85,1v,Rep,Rep,Rep,2022
+43,Utah,104,29,6,23,,75,17,58,,Rep,Rep,Rep,2022
+44,Vermont,180,30,21,7,2,150,95,43,12,Dem,Rep,Divided,2022
+45,Virginia,140,40,21,19,,100,48,52,,Divided,Rep,Divided,2022
+46,Washington,147,49,29,20,,98,57,41,,Dem,Dem,Dem,2022
+47,West Virginia,134,34,11,23,,100,22,78,,Rep,Rep,Rep,2022
+48,Wisconsin,132,33,12,21,,99,38,61,,Rep,Dem,Divided,2022
+49,Wyoming,90,30,2,28,,60,7,51,2,Rep,Rep,Rep,2022
+0,Alabama,140,35,7,25,3v,105,28,77,,Rep,Rep,Rep,2023
+1,Alaska,60,20,9,11,,40,13,21,6,Rep,Rep,Rep,2023
+2,Arizona,90,30,14,16,,60,29,31,,Rep,Dem,Divided,2023
+3,Arkansas,135,35,6,29,,100,18,82,,Rep,Rep,Rep,2023
+4,California,120,40,32,8,,80,62,18,,Dem,Dem,Dem,2023
+5,Colorado,100,35,23,12,,65,46,19,,Dem,Dem,Dem,2023
+6,Connecticut,187,36,24,12,,151,96,53,2v,Dem,Dem,Dem,2023
+7,Delaware,62,21,15,6,,41,26,15,,Dem,Dem,Dem,2023
+8,Florida,160,40,12,28,,120,35,84,1v,Rep,Rep,Rep,2023
+9,Georgia,236,56,23,33,,180,79,100,1v,Rep,Rep,Rep,2023
+10,Hawaii,76,25,23,2,,51,45,6,,Dem,Dem,Dem,2023
+11,Idaho,105,35,7,28,,70,11,59,,Rep,Rep,Rep,2023
+12,Illinois,177,59,40,19,,118,78,40,,Dem,Dem,Dem,2023
+13,Indiana,150,50,10,40,,100,30,70,,Rep,Rep,Rep,2023
+14,Iowa,150,50,16,34,,100,36,64,,Rep,Rep,Rep,2023
+15,Kansas,165,40,11,28,1,125,40,85,,Rep,Dem,Divided,2023
+16,Kentucky,138,38,7,30,1v,100,20,80,,Rep,Dem,Divided,2023
+17,Louisiana,144,39,12,27,,105,33,69,"2, 1v",Rep,Dem,Divided,2023
+18,Maine,186,35,22,13,,151,82,67,2,Dem,Dem,Dem,2023
+19,Maryland,188,47,33,13,1v,141,101,39,1v,Dem,Dem,Dem,2023
+20,Massachusetts,200,40,37,3,,160,134,25,1,Dem,Dem,Dem,2023
+21,Michigan,148,38,20,18,,110,56,54,,Dem,Dem,Dem,2023
+22,Minnesota,201,67,34,33,,134,70,64,,Dem,Dem,Dem,2023
+23,Mississippi,174,52,16,36,,122,42,76,"3, 1v",Rep,Rep,Rep,2023
+24,Missouri,197,34,10,24,,163,52,111,,Rep,Rep,Rep,2023
+25,Montana,150,50,16,34,,100,32,68,,Rep,Rep,Rep,2023
+26,Nebraska,49,49,,,49,Unicameral - nonpartisan,,,,,Rep,,2023
+27,Nevada,63,21,13,8,,42,28,14,,Dem,Rep,Divided,2023
+28,New Hampshire,424,24,10,14,,400,197,201,2v,Rep,Rep,Rep,2023
+29,New Jersey,120,40,25,15,,80,46,34,,Dem,Dem,Dem,2023
+30,New Mexico,112,42,27,15,,70,45,25,,Dem,Dem,Dem,2023
+31,New York,213,63,42,21,,150,102,48,,Dem,Dem,Dem,2023
+32,North Carolina,170,50,20,30,,120,49,71,,Rep,Dem,Divided,2023
+33,North Dakota,141,47,4,43,,94,12,82,,Rep,Rep,Rep,2023
+34,Ohio,132,33,7,26,,99,32,65,2v,Rep,Rep,Rep,2023
+35,Oklahoma,149,48,8,40,,101,20,81,,Rep,Rep,Rep,2023
+36,Oregon,90,30,17,12,1,60,35,25,,Dem,Dem,Dem,2023
+37,Pennsylvania,253,50,22,28,,203,102,101,,Divided,Dem,Divided,2023
+38,Rhode Island,113,38,33,5,,75,64,10,1,Dem,Dem,Dem,2023
+39,South Carolina,170,46,16,30,,124,36,88,,Rep,Rep,Rep,2023
+40,South Dakota,105,35,4,31,,70,7,63,,Rep,Rep,Rep,2023
+41,Tennessee,132,33,6,27,,99,24,75,,Rep,Rep,Rep,2023
+42,Texas,181,31,12,19,,150,64,86,,Rep,Rep,Rep,2023
+43,Utah,104,29,6,23,,75,14,61,,Rep,Rep,Rep,2023
+44,Vermont,180,30,22,7,1,150,104,38,8,Dem,Rep,Divided,2023
+45,Virginia,140,40,22,18,,100,48,52,,Divided,Rep,Divided,2023
+46,Washington,147,49,29,20,,98,58,40,,Dem,Dem,Dem,2023
+47,West Virginia,134,34,3,31,,100,12,88,,Rep,Rep,Rep,2023
+48,Wisconsin,132,33,11,21,1v,99,35,64,,Rep,Dem,Divided,2023
+49,Wyoming,93,31,2,29,,62,5,57,,Rep,Rep,Rep,2023
+0,Alabama,140,35,8,27,,105,29,76,,Rep,Rep,Rep,2024
+1,Alaska,60,20,9,11,,40,14,21,,Rep,Rep,Rep,2024
+2,Arizona,90,30,13,17,,60,27,33,,Rep,Dem,Divided,2024
+3,Arkansas,135,35,6,29,,100,19,81,,Rep,Rep,Rep,2024
+4,California,120,40,30,10,,80,60,20,,Dem,Dem,Dem,2024
+5,Colorado,100,35,23,12,,65,44,21,,Dem,Dem,Dem,2024
+6,Connecticut,187,36,25,11,,151,102,49,,Dem,Dem,Dem,2024
+7,Delaware,62,21,15,6,,41,27,14,,Dem,Dem,Dem,2024
+8,Florida,160,40,12,28,,120,35,85,,Rep,Rep,Rep,2024
+9,Georgia,236,56,23,33,,180,80,100,,Rep,Rep,Rep,2024
+10,Hawaii,76,25,22,3,,51,42,9,,Dem,Dem,Dem,2024
+11,Idaho,105,35,6,29,,70,9,61,,Rep,Rep,Rep,2024
+12,Illinois,177,59,40,19,,118,78,40,,Dem,Dem,Dem,2024
+13,Indiana,150,50,10,40,,100,30,70,,Rep,Rep,Rep,2024
+14,Iowa,150,50,15,35,,100,33,67,,Rep,Rep,Rep,2024
+15,Kansas,165,40,9,31,,125,37,88,,Rep,Dem,Divided,2024
+16,Kentucky,138,38,7,30,,100,20,80,,Rep,Dem,Divided,2024
+17,Louisiana,144,39,11,28,,105,32,73,,Rep,Rep,Rep,2024
+18,Maine,186,35,20,15,,151,76,73,,Dem,Dem,Dem,2024
+19,Maryland,188,47,34,13,,141,102,39,,Dem,Dem,Dem,2024
+20,Massachusetts,200,40,35,5,,160,134,25,,Dem,Dem,Dem,2024
+21,Michigan,148,38,20,18,,110,52,58,,Divided,Dem,Divided,2024
+22,Minnesota,201,67,34,33,,134,67,67,,Divided,Dem,Divided,2024
+23,Mississippi,174,52,16,36,,122,41,79,,Rep,Rep,Rep,2024
+24,Missouri,197,34,10,24,,163,52,111,,Rep,Rep,Rep,2024
+25,Montana,150,50,18,32,,100,42,58,,Rep,Rep,Rep,2024
+26,Nebraska,49,49,0,0,,Unicameral - nonpartisan,,,,,Rep,,2024
+27,Nevada,63,21,13,8,,42,27,15,,Dem,Rep,Divided,2024
+28,New Hampshire,424,24,8,16,,400,178,222,,Rep,Rep,Rep,2024
+29,New Jersey,120,40,25,15,,80,52,28,,Dem,Dem,Dem,2024
+30,New Mexico,112,42,26,16,,70,44,26,,Dem,Dem,Dem,2024
+31,New York,213,63,41,22,,150,103,47,,Dem,Dem,Dem,2024
+32,North Carolina,170,50,20,30,,120,49,71,,Rep,Dem,Divided,2024
+33,North Dakota,141,47,5,42,,94,11,83,,Rep,Rep,Rep,2024
+34,Ohio,132,33,9,24,,99,34,65,,Rep,Rep,Rep,2024
+35,Oklahoma,149,48,8,40,,101,20,81,,Rep,Rep,Rep,2024
+36,Oregon,90,30,18,12,,60,36,24,,Dem,Dem,Dem,2024
+37,Pennsylvania,253,50,22,28,,203,102,101,,Divided,Dem,Divided,2024
+38,Rhode Island,113,38,34,4,,75,64,10,,Dem,Dem,Dem,2024
+39,South Carolina,170,46,12,34,,124,36,88,,Rep,Rep,Rep,2024
+40,South Dakota,105,35,3,32,,70,6,64,,Rep,Rep,Rep,2024
+41,Tennessee,132,33,6,27,,99,24,75,,Rep,Rep,Rep,2024
+42,Texas,181,31,11,20,,150,62,88,,Rep,Rep,Rep,2024
+43,Utah,104,29,6,23,,75,14,61,,Rep,Rep,Rep,2024
+44,Vermont,180,30,16,13,,150,87,56,,Dem,Rep,Divided,2024
+45,Virginia,140,40,21,19,,100,51,49,,Dem,Rep,Divided,2024
+46,Washington,147,49,30,19,,98,59,39,,Dem,Dem,Dem,2024
+47,West Virginia,134,34,2,32,,100,9,91,,Rep,Rep,Rep,2024
+48,Wisconsin,132,33,15,18,,99,45,54,,Rep,Dem,Divided,2024
+49,Wyoming,93,31,2,29,,62,6,56,,Rep,Rep,Rep,2024
