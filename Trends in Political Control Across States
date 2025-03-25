@@ -118,14 +118,7 @@ ggplot(df_long, aes(x = Year, y = STATE, fill = Party, label = STATE)) +
 # State Legislative Composition by Party (Senate + House) stacked bar chart 
 
 ```{r echo=TRUE, fig.height=15, fig.width=15}
-data_2021 <- read_csv("Legis_2021.csv") %>% mutate(Year = 2021)
-data_2022 <- read_csv("Legis_2022.csv") %>% mutate(Year = 2022)
-data_2023 <- read_csv("Legis_2023.csv") %>% mutate(Year = 2023)
-data_2024 <- read_csv("Legis_2024.csv") %>% mutate(Year = 2024)
 
-data_combined_years <- bind_rows(data_2021, data_2022, data_2023, data_2024)
-
-# Clean and select relevant columns
 data_cleaned_short <- data_combined_years %>%
   rename(
     State = STATE,
@@ -150,7 +143,7 @@ data_cleaned_short <- data_combined_years %>%
   select(State, Year, Dem_Total, Rep_Total, Nonpartisan) %>%
   filter(!State %in% c("Total", "Total States", NA))  # remove non-state rows
 
-# Long format 
+# Long format for plotting
 data_long <- data_cleaned_short %>%
   pivot_longer(cols = c(Dem_Total, Rep_Total, Nonpartisan), names_to = "Party", values_to = "Seats") %>%
   mutate(
@@ -160,14 +153,14 @@ data_long <- data_cleaned_short %>%
                    "Nonpartisan" = "Nonpartisan")
   )
 
-# Stacked bar chart
+# Plot stacked bar chart
 ggplot(data_long, aes(x = reorder(State, Seats), y = Seats, fill = Party)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~ Year) +
+  facet_grid(.~ Year) +
   coord_flip() +
   scale_fill_manual(values = c(
-    "Democrat" = "#619CFF",
-    "Republican" = "#F8766D",
+    "Democrat" = "blue",
+    "Republican" = "red",
     "Nonpartisan" = "gray60"
   )) +
   labs(
@@ -177,4 +170,5 @@ ggplot(data_long, aes(x = reorder(State, Seats), y = Seats, fill = Party)) +
     fill = "Party"
   ) +
   theme_minimal()
+
 ```
