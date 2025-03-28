@@ -1,0 +1,124 @@
+---
+title: "Banned Enrique"
+author: "Enrique Espinosa"
+date: "2025-03-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## US County Data
+
+After an entire weekend spent finagling with a "Choropleth" map (had no clue that was even a word, but okay), I was finally able to create a decent-looking map of the contiguous US that shows data by county.
+
+Let's go ahead and load the libraries needed for this project.
+
+```{r}
+library(sf)
+library(dplyr)
+library(ggplot2)
+```
+
+Besides our regulars (dplyr and ggplot2), we have a new one: sf. This library allows us to create visual representations of data using .geojson files (in simple terms, make maps out of data).
+
+## Checking Out Our Map
+
+Let's check out our default graph, pulled off the internet and saved on our local disk:
+
+```{r}
+my_sf <- read_sf(paste0(getwd(), "\\counties.geojson"))
+plot(st_geometry(my_sf))
+```
+
+Well, that doesn't look nice. Since Alaska has a county WAY out on the right, the graph is really zoomed out. Since we're only concerned with the contiguous US, let's take out anything that isn't connected to the landmass (sorry, Puerto Rico).
+
+```{r}
+usa1 <- my_sf[my_sf$STATEFP != "02", ]
+usa2 <- usa1[usa1$STATEFP != 15, ]
+usa <- usa2[usa2$STATEFP != 72, ]
+plot(st_geometry(usa))
+```
+
+That's much better. The map is much more zoomed in, letting us see each individual county much better. Let's pull some random data from the R database: the unemployment data for each county. Furthermore, let's go ahead and format this data to be compatible with our .geojson file.
+
+```{r}
+library(maps)
+data(unemp)
+unemp$unemp <- as.numeric(unemp$unemp)
+unemp %>% ggplot(aes(x = unemp))
+geom_histogram(bins = 20, fill = "#69b3a2", color = "white")
+```
+
+That formats our data to comply with our map. Finally, let's pull one last library we need, and map our data.
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Blues")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_country <- cut(unemp$unemp, 30)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(usa), col = my_colors, bg = "#A6CAE0")
+```
+
+Ta-da! Our data is mapped correctly into our map. The frequency of unemployment is mapped so that the more occurrences happen in a county, the darker that county is.
+
+Pretty efficient way to map spatial data, in my opinion.
+
+```{r}
+my_sf2 <- read_sf(paste0(getwd(), "\\gz_2010_us_040_00_500k.json"))
+plot(st_geometry(my_sf2))
+```
+
+```{r}
+usa21 <- my_sf2[my_sf2$STATE != "02", ]
+usa22 <- usa21[usa21$STATE != 15, ]
+usastates <- usa22[usa22$STATE != 72, ]
+plot(st_geometry(usastates))
+```
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Purples")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_country <- cut(unemp$unemp, 30)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(usastates), col = my_colors, bg = "#A6CAE0")
+```
+
+```{r}
+cleandata <- read.csv("C:\\Users\\Enrique Espinosa\\Downloads\\cleaned_data.csv")
+```
+
+```{r}
+state_counts_test <- cleandata %>%
+  count(State)
+```
+
+```{r}
+map_data <- left_join(usastates, state_counts_test, by = c("STATE" = "State"))
+```
+
+```{r}
+usastates_sorted <- usastates[order(usastates$NAME), ]
+state_counts_test_sorted <- state_counts_test[order(state_counts_test$State), ]
+map_data_sorted <- map_data[order(map_data$NAME), ]
+
+colnames(state_counts_test_sorted)[colnames(state_counts_test_sorted) == "State"] <- "NAME"
+
+```
+
+```{r}
+map_data_sorted <- merge(map_data_sorted, state_counts_test_sorted, by = "NAME", all.x = TRUE)
+```
+
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Reds")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_country <- cut(map_data_sorted$n.y, 30)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(map_data_sorted), col = my_colors, bg = "#A6CAE0")
+```
