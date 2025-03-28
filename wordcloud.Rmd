@@ -1,0 +1,46 @@
+---
+title: "Wordcloud"
+author: "Amber Wolf"
+date: "2025-03-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages}
+install.packages("wordcloud2")
+install.packages("tm")
+install.packages("tidyverse")
+install.packages("png")
+library(tm)
+library(wordcloud2)
+library(tidyverse)
+library(png)
+```
+
+```{r}
+data<- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/cleaned_data.csv")
+Descriptions_Unedited <- select(data, Description)
+```
+
+```{r cleaning}
+desc_corpus <- Corpus(VectorSource(Descriptions_Unedited))
+desc_lower <- tm_map(desc_corpus, content_transformer(tolower))
+desc_punc <- tm_map(desc_lower, removePunctuation)
+desc_num <- tm_map(desc_punc, removeNumbers)
+desc_stop <- tm_map(desc_num, removeWords, stopwords("english"))
+desc_clean <- tm_map(desc_stop, stripWhitespace)
+```
+
+```{r counting}
+desc_tdm <- TermDocumentMatrix(desc_clean)
+m <- as.matrix(desc_tdm)
+word_freqs <- sort(rowSums(m), decreasing = TRUE)
+desc_df <- data.frame(word = names(word_freqs), freq = word_freqs)
+```
+
+```{r wordcloud}
+wordcloud2(desc_df, color = "blue")
+```
