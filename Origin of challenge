@@ -1,0 +1,156 @@
+```{r echo=TRUE}
+origin_trends <- new_data %>%
+  filter(!is.na(Origin.of.Challenge)) %>%
+  group_by(Year, Origin.of.Challenge) %>%
+  summarise(X = n(), .groups = "drop") %>%
+  arrange(desc(X))
+
+origin_trends
+
+ggplot(origin_trends, aes(x = factor(Year), y = X, color = Origin.of.Challenge, group = Origin.of.Challenge)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+   scale_color_manual(
+    values = c(
+      "Administration" = "#d73027",
+      "Formal Challenge" = "#4575b4",
+      "Administrator" = "#fdae61",
+      "Informal Challenge" = "#66bd63",
+      "Informal Challenge, Administration" = "#fee08b",
+      "Administration/Formal Challenge" = "green",
+      "Legislative Action" = "#9e0142",
+      "Administration/Informal Challnge" = "grey",
+      "Other"= "lightblue",
+      "Unclear" = "purple",
+      "Formal Challenge, Administration" = "pink"
+    ),
+    na.translate = FALSE  # avoid NA color showing up if not desired
+  ) +
+  labs(
+    title = "Trends in Book Ban Challenges by Origin",
+    subtitle = "Who is initiating the bans?",
+    x = "Year",
+    y = "Number of Banned Book Entries",
+    color = "Origin of Challenge"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "right"
+  )
+```
+
+```{r echo=TRUE}
+origin_trends_focus <- new_data %>%
+  filter(!is.na(Origin.of.Challenge)) %>%
+  mutate(
+    Challenge_Type = case_when(
+      grepl("Administration|Administrator", Origin.of.Challenge, ignore.case = TRUE) ~ "Administrative",
+      grepl("Legislative|Legislature", Origin.of.Challenge, ignore.case = TRUE) ~ "Legislative",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Challenge_Type)) %>%
+  group_by(Year, Challenge_Type) %>%
+  summarise(Count = n(), .groups = "drop")
+
+origin_trends_focus
+
+ggplot(origin_trends_focus, aes(x = factor(Year), y = Count, color = Challenge_Type, group = Challenge_Type)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Trends in Book Ban Challenges: Administration vs. Legislative",
+    subtitle = "Yearly counts of bans initiated by administrative or legislative action",
+    x = "Year",
+    y = "Number of Banned Book Entries",
+    color = "Origin of Challenge"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom")
+```
+
+
+# What states had legislative action as origin of challenge?
+
+```{r echo=TRUE}
+
+
+# Filter for legislative origin of challenge
+legislativeaction_states <- new_data %>%
+  filter(grepl("Legislative", Origin.of.Challenge, ignore.case = TRUE)) %>%
+  group_by(State) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  arrange(desc(Count))
+
+legislativeaction_states
+# Bar plot of states with legislative-origin bans
+ggplot(legislativeaction_states, aes(x = reorder(State, Count), y = Count)) +
+  geom_col(fill = "#9e0142") +
+  coord_flip() +
+  labs(
+    title = "States with Book Bans Originating from Legislative Action",
+    subtitle = "Filtered by entries that include 'legislative' in origin",
+    caption = " Note that Missouri, Florida, Utah, Viriginia had Republican Legislatures in 2022",
+    x = "State",
+    y = "Number of Banned Book Entries",
+  ) +
+  theme_minimal()
+
+``` 
+
+# Did increased legislative action in 2022 lead to a surge of administrative challenges the following year among states?
+
+```{r echo=TRUE}
+admin_states_2023 <- new_data %>%
+  filter(Year == 2023,
+         grepl("Administration|Administrator", Origin.of.Challenge, ignore.case = TRUE)) %>%
+  group_by(State) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  arrange(desc(Count))
+
+# Plot
+ggplot(admin_states_2023, aes(x = reorder(State, Count), y = Count)) +
+  geom_col(fill = "#d73027") +
+  coord_flip() +
+  labs(
+    title = "States with Administrative-Origin Book Bans in 2023",
+    x = "State",
+    y = "Number of Banned Book Entries",
+    subtitle = "Filtered by 'Administration' or 'Administrator' in origin field",
+  ) +
+  theme_minimal()
+``` 
+
+# 2021, 2022, 2023 bar chart comparison 
+```{r echo=TRUE}
+# Extract counts by Year and Origin Type
+leg_admin_trends <- new_data %>%
+  filter(!is.na(Origin.of.Challenge)) %>%
+  mutate(
+    Challenge_Type = case_when(
+      grepl("Legislative", Origin.of.Challenge, ignore.case = TRUE) ~ "Legislative",
+      grepl("Administration|Administrator", Origin.of.Challenge, ignore.case = TRUE) ~ "Administrative",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Challenge_Type)) %>%
+  group_by(Year, Challenge_Type) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  filter(Year %in% c(2021, 2022, 2023))  # focus on key years
+
+# Plot
+ggplot(leg_admin_trends, aes(x = factor(Year), y = Count, fill = Challenge_Type)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("Legislative" = "#9e0142", "Administrative" = "#d73027")) +
+  labs(
+    title = "Did 2022 Legislative Action Lead to 2023 Administrative Challenges?",
+    subtitle = "Comparing counts of legislative and administrative-origin book bans by year, it would appear so!",
+    x = "Year",
+    y = "Number of Banned Book Entries",
+    fill = "Challenge Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
