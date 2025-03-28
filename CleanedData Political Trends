@@ -1,0 +1,160 @@
+# Do Republican-controlled states ban more books than Democrat-controlled states
+
+```{r echo=TRUE}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+new_data <- read_csv("cleaned_data.csv")
+
+leg_control_counts <- new_data %>% 
+  group_by(Year, State, Leg.Control) %>% 
+  summarise(Count = n(), .groups = 'drop') %>% 
+    mutate(Leg.Control = recode(Leg.Control,
+                              "Dem" = "Democratic",
+                              "Rep" = "Republican"))
+
+leg_control_counts
+
+ggplot(leg_control_counts, aes(x = factor(Year), y = Count, fill = Leg.Control)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  scale_fill_manual(
+    values = c(
+      "Democratic" = "blue",
+      "Republican" = "red",
+      "Divided" = "purple",
+      "N/A" = "gray"
+    )
+  ) + 
+  labs(
+    title = "Do State's with Republican Controlled Legislatures Banning More Books?", 
+    subtitle = "It would appear so", 
+    caption = "N/A refers to Nebraska, which has a nonpartisan unicameral legislature",
+    x = "Year",
+    y = "Banned Books Count", 
+    fill = "Party in Legislative control"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle= 45, hjust =1))
+
+```
+
+
+# State by State - faceted
+
+```{r echo=TRUE, fig.height=20, fig.width=20}
+
+
+
+# Faceted bar plot by state
+ggplot(leg_control_counts, aes(x = factor(Year), y = Count, fill = Leg.Control)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  facet_wrap(~ State, scales = "fixed") +  # Facet by state
+  scale_fill_manual(
+    values = c(
+      "Democratic" = "blue",
+      "Republican" = "red",
+      "Divided" = "purple",
+      "N/A" = "gray"
+    )
+  ) + 
+  labs(
+    title = "Now Lets Look at Each State! Do States with Republican Controlled Legislatures Ban More Books?",
+    subtitle = "Overwhemlingly so",
+    caption = "N/A refers to Nebraska, which has a nonpartisan unicameral legislature",
+    x = "Year",
+    y = "Banned Books Count",
+    fill = "Party in Legislative Control"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 8)  # Adjust strip size for readability
+  )
+
+```
+
+
+# Governor's Party
+
+```{r echo=TRUE}
+gov_party_counts <- new_data %>% 
+  group_by(Year, State, Gov.Party) %>% 
+  summarise(Count = n(), .groups = 'drop') %>%
+    mutate(Gov.Party = recode(Gov.Party,
+                              "Dem" = "Democrat",
+                              "Rep" = "Republican"))
+
+ggplot(gov_party_counts, aes(x = factor(Year), y = Count, fill = Gov.Party)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  scale_fill_manual(
+    values = c(
+      "Democrat" = "blue",
+      "Republican" = "red",
+      "Divided" = "purple",  # in case it appears
+      "N/A" = "gray"
+    )
+  ) + 
+  labs(
+    title = "Do States with Republican Governors Ban More Books?",
+    subtitle = "It would appear so",
+    x = "Year",
+    y = "Banned Books Count",
+    fill = "Governor's Party"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+``` 
+
+
+# Top 10 States with most banned books - Incorporating State Political Leanings
+
+```{r echo=TRUE}
+top_states <- new_data %>%
+  group_by(State) %>%
+  summarise(Total_Bans = n(), .groups = "drop") %>%
+  arrange(desc(Total_Bans)) %>%
+  slice_head(n = 10) %>% 
+  pull(State)
+
+
+top_states_by_year <- new_data %>% 
+  filter(State %in% top_states) %>%
+  group_by(Year, State, Leg.Control, Gov.Party) %>%
+  summarise(X = n(), .groups = "drop") %>%
+  mutate(
+    Leg.Control = recode(Leg.Control,
+                         "Dem" = "Democratic",
+                         "Rep" = "Republican")
+  ) %>% 
+  arrange(desc(X))
+
+top_states_by_year
+  
+``` 
+
+
+# Visualization with faceted heat map
+
+```{r echo=TRUE}
+ggplot(top_states_by_year, aes(x = factor(Year), y = reorder(State, desc(State)), fill = X)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  facet_wrap(~Leg.Control) + 
+  labs(
+    title = "10 States with most Banned Books by Year and Legislative Control",
+    subtitle = "Darker tiles indicate more bans",
+    x = "Year",
+    y = "State",
+    fill = "Banned Books Count",
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 10, face = "bold"),
+    panel.grid = element_blank()
+  )
+``` 
+
