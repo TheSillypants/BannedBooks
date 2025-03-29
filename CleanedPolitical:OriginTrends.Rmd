@@ -36,7 +36,7 @@ ggplot(leg_control_counts, aes(x = factor(Year), y = Count, fill = Leg.Control))
     )
   ) + 
   labs(
-    title = "Do State's with Republican Controlled Legislatures Banning More Books?", 
+    title = "Do State's with Republican Controlled Legislatures Ban More Books?", 
     subtitle = "It would appear so", 
     caption = "N/A refers to Nebraska, which has a nonpartisan unicameral legislature",
     x = "Year",
@@ -52,32 +52,37 @@ ggplot(leg_control_counts, aes(x = factor(Year), y = Count, fill = Leg.Control))
 
 ```{r echo=TRUE, fig.height=20, fig.width=20}
 
-
-
 # Faceted bar plot by state
 ggplot(leg_control_counts, aes(x = factor(Year), y = Count, fill = Leg.Control)) +
   geom_bar(stat = "identity", position = "dodge") + 
-  facet_wrap(~ State, scales = "fixed") +  # Facet by state
+  facet_wrap(~ State, scales = "free_y", ncol = 6) +  # Facet by state
   scale_fill_manual(
     values = c(
       "Democratic" = "blue",
       "Republican" = "red",
       "Divided" = "purple",
       "N/A" = "gray"
-    )
+    ), 
+    breaks = c("Republican", "Democratic", "Divided", "N/A")
   ) + 
   labs(
     title = "Now Lets Look at Each State! Do States with Republican Controlled Legislatures Ban More Books?",
-    subtitle = "Overwhemlingly so",
+    subtitle = "Overwhemlingly so...",
     caption = "N/A refers to Nebraska, which has a nonpartisan unicameral legislature",
     x = "Year",
     y = "Banned Books Count",
     fill = "Party in Legislative Control"
   ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    strip.text = element_text(size = 8)  # Adjust strip size for readability
+  theme_light(base_size = 12) +
+     theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    plot.subtitle = element_text(size = 15, margin = margin(b = 10)),
+    plot.caption = element_text(size = 15, hjust = 0),
+    axis.text.x = element_text(size = 18, angle = 45, hjust = 1),
+    axis.title = element_text(face = "bold", size = 14),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold", size = 13)
   )
 
 ```
@@ -89,14 +94,14 @@ gov_party_counts <- new_data %>%
   group_by(Year, State, Gov.Party) %>% 
   summarise(Count = n(), .groups = 'drop') %>%
     mutate(Gov.Party = recode(Gov.Party,
-                              "Dem" = "Democrat",
+                              "Dem" = "Democratic",
                               "Rep" = "Republican"))
 
 ggplot(gov_party_counts, aes(x = factor(Year), y = Count, fill = Gov.Party)) +
   geom_bar(stat = "identity", position = "dodge") + 
   scale_fill_manual(
     values = c(
-      "Democrat" = "blue",
+      "Democratic" = "blue",
       "Republican" = "red",
       "Divided" = "purple",  # in case it appears
       "N/A" = "gray"
@@ -150,17 +155,20 @@ ggplot(top_states_by_year, aes(x = factor(Year), y = reorder(State, desc(State))
   scale_fill_gradient(low = "orange", high = "red") +
   facet_wrap(~Leg.Control) + 
   labs(
-    title = "10 States with most Banned Books by Year and Legislative Control",
+    title = "10 States With Most Banned Books by Year and Legislative Control",
     subtitle = "Darker tiles indicate more bans",
+    caption = 'Note: "Divided" refers to states where the party controlling the legislature 
+differs from the party of the governor.',
     x = "Year",
     y = "State",
     fill = "Banned Books Count",
   ) +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
     strip.text = element_text(size = 10, face = "bold"),
-    panel.grid = element_blank()
+    panel.grid = element_blank(),
+     plot.caption = element_text(size = 10, hjust = 0) 
   )
 ```
 
@@ -246,7 +254,7 @@ ggplot(origin_trends_focus, aes(x = factor(Year), y = Count, color = Challenge_T
   geom_point(size = 2) +
   labs(
     title = "Trends in Book Ban Challenges: Administration vs. Legislative",
-    subtitle = "Yearly counts of bans initiated by administrative or legislative action",
+    subtitle = "2021, 2022, and 2023 counts of bans initiated by administrative or legislative action",
     x = "Year",
     y = "Number of Banned Book Entries",
     color = "Origin of Challenge"
@@ -338,4 +346,60 @@ ggplot(leg_admin_trends, aes(x = factor(Year), y = Count, fill = Challenge_Type)
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+```
+
+# Political Party and certain themes
+
+```{r echo=TRUE}
+keywords <- c("immigrant", "black", "lgbtq", "queer", "gay", "romance", 
+              "sex", "gender", "mental health", "abuse", "drugs", "lesbian",
+              "nonbinary", "racism", "rape", "segregation", "addiction", "depression", "World War", "feminism", "native american", "mexican", "hispanic", "african american", "jewish", "transgender", "rights", "activism")
+
+# Step 2: Preprocess the full text
+new_data$full_text <- paste(new_data$Title, new_data$Description, new_data$Series.Name, sep = " ")
+new_data$full_text <- tolower(ifelse(is.na(new_data$full_text), "", new_data$full_text))
+
+# Step 3: Generate indicator columns
+clean_names <- c()  # Store cleaned column names to use later
+
+for (word in keywords) {
+  colname <- str_replace_all(word, "\\s+|\\+", "_")
+  pattern <- paste0("\\b", word, "\\b")
+  new_data[[colname]] <- ifelse(str_detect(new_data$full_text, regex(pattern, ignore_case = TRUE)), 1, 0)
+  clean_names <- c(clean_names, colname)
+}
+
+new_data$State.Control <- recode(new_data$State.Control,
+                                 "Rep" = "Republican",
+                                 "Dem" = "Democrat")
+
+# Step 4: Create theme count summary
+theme_counts <- new_data %>%
+  filter(!is.na(State.Control)) %>% 
+  select(State.Control, all_of(clean_names)) %>%
+  group_by(State.Control) %>%
+  summarise(across(everything(), sum)) %>%
+  pivot_longer(-State.Control, names_to = "Theme", values_to = "Count")
+
+# Optional: clean up theme labels
+theme_counts$Theme <- str_replace_all(theme_counts$Theme, "_", " ") %>% str_to_title()
+
+party_colors <- c(
+  "Republican" = "red",
+  "Democrat" = "blue",
+  "Divided" = "purple"
+)
+
+
+# Step 5: Plot it
+ggplot(theme_counts, aes(x = reorder(Theme, Count), y = Count, fill = State.Control)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = party_colors, name = "State Control") +
+  coord_flip() +
+  labs(title = "Themes in Banned Books by State Political Control",
+       subtitle = "Based on Title, Description, and Series Name",
+       caption = 'Note: "Divided" refers to states where the party controlling the legislature 
+differs from the party of the governor.',
+       x = "Theme", y = "Number of Books Mentioning Theme") +
+  theme_minimal()
 ```
