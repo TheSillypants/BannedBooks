@@ -1,0 +1,327 @@
+---
+title: "Banned Enrique"
+author: "Enrique Espinosa"
+date: "2025-03-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## US County Data
+
+After an entire weekend spent finagling with a "Choropleth" map (had no clue that was even a word, but okay), I was finally able to create a decent-looking map of the contiguous US that shows data by county.
+
+Let's go ahead and load the libraries needed for this project.
+
+```{r}
+library(sf)
+library(dplyr)
+library(ggplot2)
+```
+
+Besides our regulars (dplyr and ggplot2), we have a new one: sf. This library allows us to create visual representations of data using .geojson files (in simple terms, make maps out of data).
+
+## Checking Out Our Map
+
+Let's check out our default graph, pulled off the internet and saved on our local disk:
+
+```{r}
+my_sf <- read_sf(paste0(getwd(), "\\counties.geojson"))
+plot(st_geometry(my_sf))
+```
+
+Well, that doesn't look nice. Since Alaska has a county WAY out on the right, the graph is really zoomed out. Since we're only concerned with the contiguous US, let's take out anything that isn't connected to the landmass (sorry, Puerto Rico).
+
+```{r}
+usa1 <- my_sf[my_sf$STATEFP != "02", ]
+usa2 <- usa1[usa1$STATEFP != 15, ]
+usa <- usa2[usa2$STATEFP != 72, ]
+plot(st_geometry(usa))
+```
+
+That's much better. The map is much more zoomed in, letting us see each individual county much better. Let's pull some random data from the R database: the unemployment data for each county. Furthermore, let's go ahead and format this data to be compatible with our .geojson file.
+
+```{r}
+library(maps)
+data(unemp)
+unemp$unemp <- as.numeric(unemp$unemp)
+unemp %>% ggplot(aes(x = unemp))
+geom_histogram(bins = 20, fill = "#69b3a2", color = "white")
+```
+
+That formats our data to comply with our map. Finally, let's pull one last library we need, and map our data.
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Blues")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_country <- cut(unemp$unemp, 30)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(usa), col = my_colors, bg = "#A6CAE0")
+```
+
+Ta-da! Our data is mapped correctly into our map. The frequency of unemployment is mapped so that the more occurrences happen in a county, the darker that county is.
+
+Pretty efficient way to map spatial data, in my opinion.
+
+## US States
+
+But what if we wanted to look at data on a state-wide level? Let's pull up another .json file that measures only the states.
+
+```{r}
+my_sf2 <- read_sf(paste0(getwd(), "\\gz_2010_us_040_00_500k.json"))
+plot(st_geometry(my_sf2))
+```
+
+Right, we still have Hawaii and Alaska (and Puerto Rico). Let's take them out again:
+
+```{r}
+usa21 <- my_sf2[my_sf2$STATE != "02", ]
+usa22 <- usa21[usa21$STATE != 15, ]
+usastates <- usa22[usa22$STATE != 72, ]
+plot(st_geometry(usastates))
+```
+
+There we go, much better. Let's map the same dataset onto the state-level map now. And just for fun, let's do it in purple.
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Purples")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_country <- cut(unemp$unemp, 30)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(usastates), col = my_colors, bg = "#A6CAE0")
+```
+
+Nice! No matter what our .json file covers, we can map data to it.
+
+## Concerning Our Dataset
+
+Let's now pull up the dataset that pertains to our project: banned books and which states ban the most. We have a clean dataset, courtesy of Lucas:
+
+```{r}
+cleandata <- read.csv("C:\\Users\\Enrique Espinosa\\Downloads\\cleaned_data.csv")
+```
+
+Let's map our state-level data first; to do that, we need to count how many times each state appears in the data:
+
+```{r}
+state_counts_test <- cleandata %>%
+  count(State)
+```
+
+Now, let's join that with our .json file.
+
+```{r}
+map_data <- left_join(usastates, state_counts_test, by = c("STATE" = "State"))
+```
+
+Ok, that's not good. They're mapping by order, not by name. Let's try and factor that in:
+
+```{r}
+usastates_sorted <- usastates[order(usastates$NAME), ]
+state_counts_test_sorted <- state_counts_test[order(state_counts_test$State), ]
+map_data_sorted <- map_data[order(map_data$NAME), ]
+
+colnames(state_counts_test_sorted)[colnames(state_counts_test_sorted) == "State"] <- "NAME"
+
+```
+
+Now that everything's in order alphabetically, let's merge the data again:
+
+```{r}
+map_data_sorted <- merge(map_data_sorted, state_counts_test_sorted, by = "NAME", all.x = TRUE)
+```
+
+That's looking much better. Now, let's map the data to our .json file.
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Reds")
+my_colors <- colorRampPalette(my_colors)(300)
+class_of_country <- cut(map_data_sorted$n.y, 300)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(map_data_sorted), col = my_colors, bg = "#A6CAE0")
+```
+
+There it is! We can see that Florida bans the most books, by far. It's actually skewing the data by a lot. We've also done the map in red so that the subtleties between each state are noted. Finally, any state for which data was not found is mapped in blue.
+
+This poses an interesting question: which counties in the top two states ban the most books?
+
+Let's go back to our county .json file and isolate Florida first:
+
+```{r}
+florida <- my_sf[my_sf$STATEFP == 12, ]
+plot(st_geometry(florida))
+```
+
+There are the Floridian counties. Now, we need to isolate our data:
+
+```{r}
+cleanflorida <- cleandata[cleandata$State == "Florida", ]
+```
+
+Now we have all the occurrences of Florida in the dataset, but there's just one problem: in our .json file, the counties are named by county name only, while in our dataset, they have extra words. Let's try removing any occurence of extra words (and take out any whitespace as well):
+
+```{r}
+cleanfloridacounty <- gsub("county|district|school|schools|public|of| |the", "", cleanflorida$District, ignore.case = TRUE)
+cleanfloridacounties <- trimws(cleanfloridacounty)
+
+```
+
+Yeesh. That worked a little too well. Counties like "Palm Beach" that are composed of two words now are composed of only one.
+
+Since there's no automated solution that works successfully (and I've tried them all), the only thing is to fix each one manually, which is pretty tedious:
+
+```{r}
+cleanfloridacounties_df <- data.frame(District = cleanfloridacounties)
+
+cleanfloridacounties_df$District <- gsub("PalmBeach", "Palm Beach", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("IndianRiver", "Indian River", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("SantaRosa", "Santa Rosa", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("St.Lucie", "St. Lucie", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("St.Johns", "St. Johns", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("St.John's", "St. Johns", cleanfloridacounties_df$District)
+
+
+cleanfloridacounties_df_done <- cleanfloridacounties_df
+```
+
+Finally, we have the right place names. Let's count how many times each one of those places occurs.
+
+```{r}
+cleanfl_c_count <- cleanfloridacounties_df_done %>%
+  count(District)
+```
+
+Now that we have that, it's time to go through the tedious process of organizing each value to where it goes and- wait. What about this: R can combine two datasets if they both have the same name for a column. What if we change the name of the column for the counties in Florida to be compatible with the .json file...
+
+```{r}
+colnames(cleanfl_c_count)[colnames(cleanfl_c_count) == "District"] <- "NAME"
+```
+
+...order the .json file alphabetically...
+
+```{r}
+florida_sort <- florida[order(florida$NAME), ]
+```
+
+...and then merge the two datasets?
+
+```{r}
+florida_fullsort <- merge(florida_sort, cleanfl_c_count, by = "NAME", all.x = TRUE)
+```
+
+Nice! Each data point goes to the county it corresponds to. Let's map the data now:
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Reds")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_fl_county <- cut(florida_fullsort$n, 30)
+my_colors <- my_colors[as.numeric(class_of_fl_county)]
+plot(st_geometry(florida_fullsort), col = my_colors, bg = "#A6CAE0")
+```
+
+Bang! Our .json file maps correctly! Once again, it seems as though one county (Escambia) is skewing the entire dataset. We've got it in red again to show the changes between the counties, and any blue county has no data.
+
+Now let's do the same for Iowa:
+
+```{r}
+iowa <- my_sf[my_sf$STATEFP == 19, ]
+plot(st_geometry(iowa))
+```
+
+```{r}
+cleaniowa <- cleandata[cleandata$State == "Iowa", ]
+```
+
+```{r}
+cleaniowacounty <- gsub("county|district|school|schools|public|of| |the|community", "", cleaniowa$District, ignore.case = TRUE)
+cleaniowacounties <- trimws(cleaniowacounty)
+```
+
+Much more things to correct this time around, but eh, c'est la vie:
+
+```{r}
+cleaniowacounties_df <- data.frame(District = cleaniowacounties)
+
+cleaniowacounties_df$District <- gsub("CedarFalls", "Cedar Falls", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("CentralLyon", "Central Lyon", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("CentralSprings", "Central Springs", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("ClaytonRidge", "Clayton Ridge", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("ClearCreek-Amana", "Clear Creek-Amana", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("ClearLake", "Clear Lake", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("CouncilBluffs", "Council Bluffs", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("DallasCenter-Grimes", "Dallas Center-Grimes", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("Dike-NewHartford", "Dike-New Hartford", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("EastUnion", "East Union", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("ForestCity", "Forest City", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("GrundyCenter", "Grundy Center", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("Interstate35", "Interstate 35", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("IowaCity", "Iowa City", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("LakeMills", "Lake Mills", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("MaquoketaValley", "Maquoketa Valley", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("MarionIndependent", "Marion", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("MasonCity", "Mason City", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("MissouriValley", "Missouri Valley", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("NewHampton", "New Hampton", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("NodawayValley", "Nodaway Valley", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("NorthPolk", "Polk", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("NorthwoodKensett", "Northwood Kensett", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("PocahontasArea", "Pocahontas Area", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("RedOak", "Red Oak", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("RidgeView", "Ridge View", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("RiverValley", "River Valley", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SiouxCenter", "Sioux Center", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SiouxCity", "Sioux City", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouastPolk", "Polk", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouastWarren", "Warren", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouthCentralCalhoun", "Calhoun", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouthHamilton", "Hamilton", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouthTama", "Tama", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SpiritLake", "Spirit Lake", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("St.Ansgar", "St. Ansgar", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("TwinCedars", "Cedar", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("VanBuren", "Van Buren", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("VanMeter", "Van Meter", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("WestDesMoines", "Des Moines", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("WestMarshall", "Marshall", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("WesternDubuque", "Dubuque", cleaniowacounties_df$District)
+
+cleaniowacounties_df_done <- cleaniowacounties_df
+```
+
+```{r}
+cleania_c_count <- cleaniowacounties_df %>%
+  count(District)
+```
+
+```{r}
+colnames(cleania_c_count)[colnames(cleania_c_count) == "District"] <- "NAME"
+```
+
+```{r}
+iowa_sort <- iowa[order(iowa$NAME), ]
+```
+
+```{r}
+iowa_fullsort <- merge(iowa_sort, cleania_c_count, by = "NAME", all.x = TRUE)
+```
+
+Now let's graph Iowa:
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Reds")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_ia_county <- cut(iowa_fullsort$n, 30)
+my_colors <- my_colors[as.numeric(class_of_ia_county)]
+plot(st_geometry(iowa_fullsort), col = my_colors, bg = "#A6CAE0")
+```
+
+Tada! We can see that once again, it's a select few counties that are skewing the data (looking at you, Des Moines). But this is noteworthy: the majority of the state does not have data; those select few just have so many banned, it overpowers the others.
+
+But sheesh: you would think a state with "our liberties we prize" in their motto would let kids read what they want.
