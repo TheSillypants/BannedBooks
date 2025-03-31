@@ -10,22 +10,29 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r packages}
-install.packages("wordcloud2")
-install.packages("tm")
-install.packages("tidyverse")
-install.packages("png")
+#install.packages("wordcloud2")
+#install.packages("tm")
+#install.packages("tidyverse")
+#install.packages("png")
+#install.packages("tidytext")
+#install.packages("stringr")
+#install.packages("ggplot2")
 library(tm)
 library(wordcloud2)
 library(tidyverse)
 library(png)
+library(tidytext)
+library(stringr)
+library(ggplot2)
 ```
 
-```{r}
+```{r data setup}
 data<- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/cleaned_data.csv")
 Descriptions_Unedited <- select(data, Description)
 ```
 
 ```{r cleaning}
+#Descriptions
 desc_corpus <- Corpus(VectorSource(Descriptions_Unedited))
 desc_lower <- tm_map(desc_corpus, content_transformer(tolower))
 desc_punc <- tm_map(desc_lower, removePunctuation)
@@ -35,6 +42,7 @@ desc_clean <- tm_map(desc_stop, stripWhitespace)
 ```
 
 ```{r counting}
+#Descriptions
 desc_tdm <- TermDocumentMatrix(desc_clean)
 m <- as.matrix(desc_tdm)
 word_freqs <- sort(rowSums(m), decreasing = TRUE)
@@ -43,4 +51,63 @@ desc_df <- data.frame(word = names(word_freqs), freq = word_freqs)
 
 ```{r wordcloud}
 wordcloud2(desc_df, color = "blue")
+```
+
+```{r}
+genrekeywords <- c("Young Adult", "Contemporary", "Romance", "Fiction", "Audiobook","Young Adult Contemporary", "Historical Fiction", "Nonfiction", "Middle Grade", "History", "Childrens", "Realistic Fiction", "Mystery Thriller", "Mystery", "Thriller", "Biography", "American History", "Poetry", "nullYoung Adult", "nullPoetry", "nullFiction","Humor", "Fantasy", "Biography Memoir","Teen", "Horror", "Thriller", "Adult", "New Adult", "Graphic Novels", "Comics", "Classics", "Autobiography", "Memoir", "Urban Fantasy", "Paranormal Romance", "Science Fiction", "Paranormal", "nullFantasy","Young Adult Fantasy", "Fairy Tales", "Speculative Fiction", "Literary Fiction", "Adventure", "Sports", "True Crime", "Crime", "Adult Fiction", "Picture Books", "M M Romance", "Action", "Science Fiction Fantasy", "Graphic Novels Comics","nullNonfiction", "nullGraphic Novels", "nullMiddle Grade", "Art", "Space", "Nature", "Short Stories", "Anthologies", "High Fantasy", "nullPicture Books", "Juvenile", "nullRealistic Fiction", "Biography Memoir", "nullHistorical Fiction", "nullRomance", "Novella", "Contemporary Romance", "Historical Romance", "Fantasy Romance", "Science", "Education", "Manga",   "Paranormal Romance", "Textbooks", "Diary", "Flash Fiction", "Fairy Tale Retellings","Womens Fiction", "Contemporary fiction", "Young Adult Historical Fiction", "Science fiction", "military science fiction", "Military Fiction")
+
+data$genres <- paste(data$Genre, sep = " ")
+data$genres <- tolower(ifelse(is.na(data$genres), "", data$genres))
+
+clean_names <- c()
+
+for (word in genrekeywords) {
+  colname <- str_replace_all(word, "\\s+|\\+", "_")
+  pattern <- paste0("\\b", word, "\\b")
+  data[[colname]] <- ifelse(str_detect(data$genres, regex(pattern, ignore_case = TRUE)), 1, 0)
+  clean_names <- c(clean_names, colname) }
+```
+
+```{r}
+genre_counts <- data %>%
+  filter(!is.na(Genre)) %>% 
+  select(Genre, all_of(clean_names)) %>%
+  group_by(Genre) %>%
+  summarise(across(everything(), sum)) %>%
+  pivot_longer(-Genre, names_to = "Genres", values_to = "Count")
+
+genrecountdf <- genre_counts %>% select(-Genre)
+
+genrecountdfclean <- genrecountdf %>%
+  group_by(Genres) %>%
+  summarize(across(everything(), sum, na.rm = TRUE))
+
+genrecountfinal <- genrecountdfclean
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullFantasy"] <- "Fantasy"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullFiction"] <- "Fiction"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullGraphic_Novels"] <- "Graphic_Novels"
+   genrecountfinal$Genres[genrecountfinal$Genres == "nullHistorical_Fiction"] <- "Historical_Fiction"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullMiddle_Grade"] <- "Middle_Grade"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullNonfiction"] <- "Nonfiction"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullPicture_Books"] <- "Picture_Books"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullPoetry"] <- "Poetry"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullRealistic_Fiction"] <- "Realistic_Fiction"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullRomance"] <- "Romance"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullYoung_Adult"] <- "Young_Adult"
+  
+  genrecount_final <- genrecountfinal %>%
+  group_by(Genres) %>%
+  summarize(across(everything(), sum, na.rm = TRUE))
+```
+
+```{r}
+wordcloud2(genrecount_final, color = "blue")
+```
+```{r}
+top_10_genres <- genrecount_final %>% 
+  slice_max(order_by = Count, n = 10)
+
+ggplot(top_10_genres, aes(x = Genres, y = Count)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
