@@ -1,0 +1,26 @@
+---
+title: "Banned Books - At Least We're Not Burning Them"
+author: "Lucas Deese, Amber Wolf, Enrique Espinonsa, Alexis Shermett"
+date: "2025-03-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+# Question
+
+Our initial question was to see if we could find patterns surrounding the banning of books in schools around the United States (although we focused on the contigious U.S.). The question was intentionally broad, allowing us to look at everything from political information to book content.
+
+# Data
+
+We used a number of dataset, 8 in total, from 3 different sources, to answer our various questions. 3 of our datasets are sourced from Pen America, where we got their banned books datasets for the 2021-2022 academic year, the 2022-2023 academic year, and the 2023-2024 academic year. These three datasets were the foundation of our project, and contained everything from the source of the challenge to the status of the book to the counties it was challenged in. We didn't exhause the possibilites of the dataset, but I think we came close. Added onto this were the 4 datasets from the National Conference of State Legislatures, comprising the 4 years covered in the Pen datasets. These datasets had the majority political party in the legislature and government of each state for all four years. Lastly, our Kaggle dataset contained descriptions for many of the books in the Pen dataset.
+
+## Data cleaning
+The cleaning of this dataset was a rather ardous process
+
+
+

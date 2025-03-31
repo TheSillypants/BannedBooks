@@ -1,0 +1,189 @@
+---
+title: "Data Cleaning"
+output: html_document
+date: "2025-03-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r load data in}
+p1_2 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/PEN America's Index of School Book Bans (July 1, 2021 - June 30, 2022) - Sorted by Author & Title.csv")
+
+p2_3 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/PEN America's Index of School Book Bans (July 1, 2022 - June 30, 2023) - Sorted by Author & Title.csv")
+
+p3_4 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/PEN America's Index of School Book Bans (July 1, 2023 - June 30, 2024) - Sorted by Author & Title.csv")
+```
+
+```{r cleaning func 1}
+
+setColTitles <- function(data) {
+ data2 <- data[-1,]
+ colNames <- colnames(data2)
+ newColNames <- as.list(data2[1,])
+ print(data2)
+ for (x in colNames) {
+   for (y in newColNames) {
+     data2 <- data2 %>% rename( y = x )
+   }
+ }
+ #data2 <- data2 %>% rename( "Author" = "X")
+} 
+
+
+setColTitles(p1_2)
+```
+
+Long story short, the above is crap. Apparently, read_csv has a *skip* option, that does exactly this. **Easily. In 8 characters.** Coding never fails to remind us of our own stupidity
+
+``` {r re-import the pen data}
+p1_2 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/PEN America's Index of School Book Bans (July 1, 2021 - June 30, 2022) - Sorted by Author & Title.csv", skip =2)
+p1_2 <- p1_2 %>% rename("Ban.Status" = "Type.of.Ban")
+p1_2 <- p1_2 %>% mutate(Series.Name = "Unknown")
+p1_2 <- p1_2 %>% mutate(Year = "2021")
+p1_2 <- p1_2 %>% mutate(E.Year = "2022")
+
+p2_3 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/PEN America's Index of School Book Bans (July 1, 2022 - June 30, 2023) - Sorted by Author & Title.csv", skip =2)
+p2_3 <- p2_3 %>% mutate(Year = "2022")
+p2_3 <- p2_3 %>% mutate(E.Year = "2023")
+
+p3_4 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/PEN America's Index of School Book Bans (July 1, 2023 - June 30, 2024) - Sorted by Author & Title.csv", skip=2)
+p3_4 <- p3_4 %>% rename("Origin.of.Challenge" = "Initiating.Action")
+p3_4 <- p3_4 %>% mutate(Year = "2023")
+p3_4 <- p3_4 %>% mutate(E.Year = "2024")
+
+pen <- rbind(p2_3, p1_2)
+pen <- rbind(pen, p3_4)
+print(pen)
+```
+
+
+```{r}
+kds <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/kaggle_merged_dataset.csv")
+print(kds)
+
+test <- left_join(pen, kds, by = c("Author", "Title"))
+print(test)
+# causes way too many duplicates, doesn't actually work
+
+test2 <- merge(pen, kds)
+print(test2)
+# loses so much data
+
+test <- left_join(pen, kds, by = c("Author"))
+print(test)
+# even worse
+```
+
+
+```{r}
+kds2 <- distinct(kds, Title, .keep_all = TRUE)
+print(kds %>% filter(Title == "The Poet X"))
+print(kds2)
+print(pen)
+
+kds2 %>%
+  #select(Title) %>%
+  filter(Title == "The Poet X")
+```
+
+
+```{r}
+test <- left_join(pen, kds2, by = c("Title"))
+print(test)
+penstr <- test %>%
+   filter(Title == "Call Me By Your Name")
+
+kdsstr <- kds2 %>%
+  filter(Title == "Call Me By Your Name (Call Me By Your Name, #1)")
+
+kdsstr2 <- kds2 %>%
+  filter(Title == "Call Me By Your Name")
+
+print(kdsstr)
+print(penstr)
+print(kdsstr2)
+
+str <- "Call Me By Your Name (Call Me By Your Name, #1)"
+print(str)
+str <- sub(" \\(.*,#.*\\)", "", str)
+print(str)
+
+str <- "Nickel and Dimed: On (Not) Getting by in America"
+print(str)
+str <- sub(" \\(.*,#.*\\)", "", str)
+print(str)
+```
+
+
+## New Plan
+  
+  remove all dupes from description
+  write function to append descriptions to the array
+  write similar function for political data
+  
+
+
+```{r}
+kds2
+A <- function(x) sub(" \\(.*,.*#.*\\)", "", x) 
+                     
+kds2 <- kds2 %>%
+  mutate(across(2:2, A))
+#kds2 %>%
+  #filter(Title == "Call Me By Your Name (Call Me By Your Name, #1)")
+#kds2 %>%
+  #filter(Author == "André Aciman")
+
+kds2 <- kds2[c("Title", "Description")]
+
+
+test <- left_join(pen, kds2, by = c("Title"))
+print(test)
+
+
+```
+
+```{r}
+legis1 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/Legis_2021.csv")
+legis1 <- legis1 %>% mutate(Year = "2021")
+
+
+legis2 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/Legis_2022.csv")
+legis2 <- legis2 %>% mutate(Year = "2022")
+
+
+legis3 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/Legis_2023.csv")
+legis3 <- legis3 %>% mutate(Year = "2023")
+legis3 <- subset(legis3, select = -c(X))
+
+legis4 <- read.csv("/home/luka/Banned Books: At Least We're Not Burning Them/Data/Legis_2024.csv")
+legis4 <- legis4 %>% mutate(Year = "2024")
+
+
+legishalf1 <- rbind(legis1, legis2)
+legishalf2 <- rbind(legis3, legis4)
+
+legis <-rbind(legishalf1, legishalf2)
+print(legis)
+print(legis %>% filter(STATE == "Total States"))
+legis <- subset(legis, legis$STATE != "Total States" )
+legis <- subset(legis, select = -c(Total.Seats, Total.Senate, Senate.Dem, Senate.Rep, Senate.other, Total.House, House.Dem, House.Rep, House.other))
+legis <- legis %>%
+  rename( State = STATE)
+print(legis)
+
+final <- left_join(test, legis, by = c("Year", "State"))
+print(final)
+```
+
+```
