@@ -64,20 +64,20 @@ Next Lucas tried the first attempt at cleaning the data.
 
 ```{r cleaning func 1}
 
-setColTitles <- function(data) {
- data2 <- data[-1,]
- colNames <- colnames(data2)
- newColNames <- as.list(data2[1,])
- print(data2)
- for (x in colNames) {
-   for (y in newColNames) {
-     data2 <- data2 %>% rename( y = x )
-   }
- }
+#setColTitles <- function(data) {
+# data2 <- data[-1,]
+# colNames <- colnames(data2)
+# newColNames <- as.list(data2[1,])
+# print(data2)
+# for (x in colNames) {
+#   for (y in newColNames) {
+#     data2 <- data2 %>% rename( y = x )
+#   }
+# }
  #data2 <- data2 %>% rename( "Author" = "X")
-} 
+# } 
 
-setColTitles(p1_2)
+# setColTitles(p1_2)
 ```
 
 In the end, he, long story short, realized that the above code is crap. Apparently, read_csv has a *skip* option, that does exactly what the above code was attempted to achieve. **Easily. In 8 characters.** Coding never fails to remind us of our own stupidity, but the trials led us to discover different features we didn't realize existed.
@@ -123,17 +123,17 @@ After making sure that all of the Pen datasets were binded, next came adding the
 kds <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/merged_dataset%20(1).csv")
 print(kds)
 
-test <- left_join(pen, kds, by = c("Author", "Title"))
-print(test)
-# causes way too many duplicates, doesn't actually work
+# test <- left_join(pen, kds, by = c("Author", "Title"))
+# print(test)
+## causes way too many duplicates, doesn't actually work
 
-test2 <- merge(pen, kds)
-print(test2)
-# loses so much data
+# test2 <- merge(pen, kds)
+# print(test2)
+## loses so much data
 
-test <- left_join(pen, kds, by = c("Author"))
-print(test)
-# even worse
+# test <- left_join(pen, kds, by = c("Author"))
+# print(test)
+## even worse
 ```
 
 As seen above, there were issues when trying to join the data by author, either with duplications occurring, loosing data, or not being able to match authors as the last and first names were reversed. This was a major issue when trying to join the data as the author names not being written the same led to descriptions not being able to be matched up by author as it would not recognize them as the same.
@@ -234,7 +234,7 @@ print(final)
 
 ## The Application & Findings
 
-One of the first things we wanted to look at was what was banned more often than not. This consists of what genres were more banned than other, which words weremost frequently in the descriptions of banned books, along with what the most banned book out of this data was.
+One of the first things we wanted to look at was what was banned more often than not. This consists of what genres were more banned than other, which words were most frequently in the descriptions of banned books, along with what the most banned book out of this data was.
 
 ```{r}
 # For all of us, as we did our work on our own computers, we called in the dataset that Lucas gave us. While we all named it differently in our own work, it will share a name for ease of code.
@@ -256,13 +256,13 @@ genrekeywords <- c("Young Adult", "Contemporary", "Romance", "Fiction", "Audiobo
 cleaned_data$genres <- paste(cleaned_data$Genre, sep = " ")
 cleaned_data$genres <- tolower(ifelse(is.na(cleaned_data$genres), "", cleaned_data$genres))
 
-clean_names <- c()
+clean_names_g <- c()
 
 for (word in genrekeywords) {
   colname <- str_replace_all(word, "\\s+|\\+", "_")
   pattern <- paste0("\\b", word, "\\b")
-  data[[colname]] <- ifelse(str_detect(cleaned_data$genres, regex(pattern, ignore_case = TRUE)), 1, 0)
-  clean_names <- c(clean_names, colname)}
+  cleaned_data[[colname]] <- ifelse(str_detect(cleaned_data$genres, regex(pattern, ignore_case = TRUE)), 1, 0)
+  clean_names_g <- c(clean_names_g, colname)}
 ```
 
 After making the list of keywords, it then went down to cleaning the genres and counting.
@@ -270,7 +270,7 @@ After making the list of keywords, it then went down to cleaning the genres and 
 ```{r}
 genre_counts <- cleaned_data %>%
   filter(!is.na(Genre)) %>% 
-  select(Genre, all_of(clean_names)) %>%
+  select(Genre, all_of(clean_names_g)) %>%
   group_by(Genre) %>%
   summarise(across(everything(), sum)) %>%
   pivot_longer(-Genre, names_to = "Genres", values_to = "Count")
@@ -366,7 +366,7 @@ most_banned_book <- cleaned_data %>%
   pull(Title)
 
 # Crank appears as most banned book
-states_banned <- new_data %>%
+states_banned <- cleaned_data %>%
   filter(Title == most_banned_book) %>%
   distinct(State) %>%
   pull(State)
@@ -381,7 +381,7 @@ print(states_banned)
 This code allows us to see that Crank was the most banned book in the dataset. It was banned by 19 states.
 
 ```{r}
-crank_data <- new_data %>%
+crank_data <- cleaned_data %>%
   filter(Title == most_banned_book)
 
 ```
@@ -417,7 +417,7 @@ After looking at the party control of the state governments, it was an interesti
 ```{r echo=TRUE, fig.height=8, fig.width=15}
 
 # Step 1: Add Ban.Category
-crank_data <- new_data %>%
+crank_data <- cleaned_data %>%
   filter(Title == "Crank") %>%
   mutate(Ban.Category = case_when(
     grepl("Pending Investigation", Ban.Status, ignore.case = TRUE) ~ "Pending",
@@ -710,7 +710,7 @@ ggplot(origin_trends_focus, aes(x = factor(Year), y = Count, color = Challenge_T
 
 
 # Filter for legislative origin of challenge
-legislativeaction_states <- new_data %>%
+legislativeaction_states <- cleaned_data %>%
   filter(grepl("Legislative", Origin.of.Challenge, ignore.case = TRUE)) %>%
   group_by(State) %>%
   summarise(Count = n(), .groups = "drop") %>%
@@ -735,7 +735,7 @@ ggplot(legislativeaction_states, aes(x = reorder(State, Count), y = Count)) +
 #### Did increased legislative action in 2022 lead to a surge of administrative challenges the following year?
 
 ```{r echo=TRUE}
-admin_states_2023 <- new_data %>%
+admin_states_2023 <- cleaned_data %>%
   filter(Year == 2023,
          grepl("Administration|Administrator", Origin.of.Challenge, ignore.case = TRUE)) %>%
   group_by(State) %>%
@@ -758,7 +758,7 @@ ggplot(admin_states_2023, aes(x = reorder(State, Count), y = Count)) +
 ```{r echo=TRUE}
 
 # Extract counts by Year and Origin Type
-leg_admin_trends <- new_data %>%
+leg_admin_trends <- cleaned_data %>%
   filter(!is.na(Origin.of.Challenge)) %>%
   mutate(
     Challenge_Type = case_when(
@@ -796,8 +796,8 @@ keywords <- c("immigrant", "black", "lgbtq", "queer", "gay", "romance",
               "nonbinary", "racism", "rape", "segregation", "addiction", "depression", "World War", "feminism", "native american", "mexican", "hispanic", "african american", "jewish", "transgender", "rights", "activism")
 
 # Step 2: Preprocess the full text
-new_data$full_text <- paste(new_data$Title, new_data$Description, new_data$Series.Name, sep = " ")
-new_data$full_text <- tolower(ifelse(is.na(new_data$full_text), "", new_data$full_text))
+cleaned_data$full_text <- paste(cleaned_data$Title, cleaned_data$Description, cleaned_data$Series.Name, sep = " ")
+cleaned_data$full_text <- tolower(ifelse(is.na(cleaned_data$full_text), "", cleaned_data$full_text))
 
 # Step 3: Generate indicator columns
 clean_names <- c()  # Store cleaned column names to use later
@@ -805,16 +805,16 @@ clean_names <- c()  # Store cleaned column names to use later
 for (word in keywords) {
   colname <- str_replace_all(word, "\\s+|\\+", "_")
   pattern <- paste0("\\b", word, "\\b")
-  new_data[[colname]] <- ifelse(str_detect(new_data$full_text, regex(pattern, ignore_case = TRUE)), 1, 0)
+  cleaned_data[[colname]] <- ifelse(str_detect(cleaned_data$full_text, regex(pattern, ignore_case = TRUE)), 1, 0)
   clean_names <- c(clean_names, colname)
 }
 
-new_data$State.Control <- recode(new_data$State.Control,
+cleaned_data$State.Control <- recode(cleaned_data$State.Control,
                                  "Rep" = "Republican",
                                  "Dem" = "Democrat")
 
 # Step 4: Create theme count summary
-theme_counts <- new_data %>%
+theme_counts <- cleaned_data %>%
   filter(!is.na(State.Control)) %>% 
   select(State.Control, all_of(clean_names)) %>%
   group_by(State.Control) %>%
@@ -933,7 +933,7 @@ With the dataset that pertains to our project loaded, we can look at which state
 Let's map our state-level data first; to do that, we need to count how many times each state appears in the data:
 
 ```{r}
-state_counts_test <- cleandata %>%
+state_counts_test <- cleaned_data %>%
   count(State)
 ```
 
@@ -984,7 +984,7 @@ plot(st_geometry(florida))
 There are the Floridian counties. Now, we need to isolate our data:
 
 ```{r}
-cleanflorida <- cleandata[cleandata$State == "Florida", ]
+cleanflorida <- cleaned_data[cleaned_data$State == "Florida", ]
 ```
 
 Now we have all the occurrences of Florida in the dataset, but there's just one problem: in our .json file, the counties are named by county name only, while in our dataset, they have extra words. Let's try removing any occurence of extra words (and take out any whitespace as well):
@@ -1059,7 +1059,7 @@ plot(st_geometry(iowa))
 ```
 
 ```{r}
-cleaniowa <- cleandata[cleandata$State == "Iowa", ]
+cleaniowa <- cleaned_data[cleaned_data$State == "Iowa", ]
 ```
 
 ```{r}
