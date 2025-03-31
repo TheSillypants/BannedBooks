@@ -1,0 +1,86 @@
+# What was the most banned book?
+
+```{r}
+most_banned_book <- new_data %>%
+  count(Title, sort = TRUE) %>%
+  slice(1) %>%
+  pull(Title)
+
+# Crank appears as most banned book
+states_banned <- new_data %>%
+  filter(Title == most_banned_book) %>%
+  distinct(State) %>%
+  pull(State)
+
+cat("Most banned book:", most_banned_book, "\n")
+# Crank appears as most banned book 
+cat("States that banned it:\n")
+print(states_banned)
+
+```
+This code allows us to see that Crank was the most banned book in the dataset. It was banned by 19 states. 
+
+
+```{r}
+crank_data <- new_data %>%
+  filter(Title == most_banned_book)
+
+```
+
+# Frequency of Crank's ban (categorized by state political control)
+```{r}
+#  frequency of bans by year
+ggplot(crank_data, aes(x = factor(Year), fill = State.Control)) +
+  geom_bar() +
+   scale_fill_manual(
+    values = c("Rep" = "red", "Dem" = "blue", "Divided" = "purple", "N/A" = "gray"),
+    labels = c("Rep" = "Republican", "Dem" = "Democrat", "Divided" = "Divided")
+  ) +
+  labs(
+    title = "Yearly Frequency of *Crank* Bans by Ellen Hopkins",
+    subtitle = "Categorized by State Political Control",
+    x = "Year", y = "Number of Bans",
+    fill = "State Political Control"
+  ) +
+  theme_minimal()
+
+```
+See a dramatic increase in bans of the book "Crank" in 2023, the year after book banning bills were introduced. 
+
+# Bans and Pending Bans of Crank in States and their Political Control 
+```{r echo=TRUE, fig.height=8, fig.width=15}
+
+# Step 1: Add Ban.Category
+crank_data <- new_data %>%
+  filter(Title == "Crank") %>%
+  mutate(Ban.Category = case_when(
+    grepl("Pending Investigation", Ban.Status, ignore.case = TRUE) ~ "Pending",
+    grepl("Banned", Ban.Status, ignore.case = TRUE) ~ "Banned",
+    TRUE ~ "Other"
+  ))
+
+# Step 2: Summarize by State, Category, and Political Control
+ban_combined <- crank_data %>%
+  group_by(State, Ban.Category, State.Control) %>%
+  summarise(Count = n(), .groups = "drop")
+
+# Step 3: Plot
+ggplot(ban_combined, aes(x = reorder(State, -Count), y = Count, fill = State.Control)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+  facet_wrap(~Ban.Category, scales = "free_y") +
+  coord_flip() +
+  scale_fill_manual(
+    values = c("Rep" = "red", "Dem" = "blue", "Divided" = "purple", "N/A" = "gray"),
+    labels = c("Rep" = "Republican", "Dem" = "Democrat", "Divided" = "Divided", "N/A" = "N/A")
+  ) +
+  labs(
+    title = "Bans and Pending Investigations of *Crank* by Ellen Hopkins",
+    subtitle = "Categorized by State and Political Control",
+    x = "State", y = "Number of Challenges",
+    fill = "State Political Control"
+  ) +
+  theme_minimal()
+
+```
+
+Can see that Iowa and Floria were number 1 and 2 in banning this book. Some bans are still pending. 
