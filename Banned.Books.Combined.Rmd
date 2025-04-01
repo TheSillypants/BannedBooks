@@ -102,14 +102,14 @@ p3_4 <- p3_4 %>% mutate(E.Year = "2024")
 
 pen <- rbind(p2_3, p1_2)
 pen <- rbind(pen, p3_4)
-print(pen)
+head(pen)
 ```
 
 After making sure that all of the Pen datasets were binded, next came adding the genres and descriptions for all of the books onto the data, ensuring that the descriptions properly matched up with the correct books. This was done by joining them by the title of the book and the author of the book, as those two columns were in both the Pen data and the Kaggle dataset that had the descriptions.
 
 ```{r}
 kds <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/merged_dataset%20(1).csv")
-print(kds)
+head(kds)
 
 # test <- left_join(pen, kds, by = c("Author", "Title"))
 # print(test)
@@ -129,63 +129,60 @@ As seen above, there were issues when trying to join the data by author, either 
 ```{r}
 kds2 <- distinct(kds, Title, .keep_all = TRUE)
 print(kds %>% filter(Title == "The Poet X"))
-print(kds2)
-print(pen)
+head(kds2)
+head(pen)
 
 kds2 %>%
-  #select(Title) %>%
   filter(Title == "The Poet X")
 ```
 
-```{r}
-#test <- left_join(pen, kds2, by = c("Title"))
-#print(test)
-#penstr <- test %>%
-#   filter(Title == "Call Me By Your Name")
-
-#kdsstr <- kds2 %>%
-#  filter(Title == "Call Me By Your Name (Call Me By Your Name, #1)")
-
-#kdsstr2 <- kds2 %>%
-#  filter(Title == "Call Me By Your Name")
-
-#print(kdsstr)
-#print(penstr)
-#print(kdsstr2)
-
-#str <- "Call Me By Your Name (Call Me By Your Name, #1)"
-#print(str)
-#str <- sub(" \\(.*,#.*\\)", "", str)
-#print(str)
-
-#str <- "Nickel and Dimed: On (Not) Getting by in America"
-#print(str)
-#str <- sub(" \\(.*,#.*\\)", "", str)
-#print(str)
-```
-
-### A New Plan
-
-The new plan consisted of removing all dupes from the descriptions by writing a function that would append the descriptions to the array. A similar function would then be written to do the same write for the political data.
+The above block of code started to hopefully rectify one of a few issues. The dataset had duplicate entries: same books, same descriptions, just different formatting on author names. This block wiped any duplicate titles, getting us down to just one entry per book. However, the titles *still* decided not to match up politely. Looking through the data gave me my reason:
 
 ```{r}
-kds2
-A <- function(x) sub(" \\(.*,.*#.*\\)", "", x) 
-                     
-kds2 <- kds2 %>%
-  mutate(across(2:2, A))
-#kds2 %>%
-  #filter(Title == "Call Me By Your Name (Call Me By Your Name, #1)")
-#kds2 %>%
-  #filter(Author == "André Aciman")
-
-kds2 <- kds2[c("Title", "Description","Genre")]
-
 test <- left_join(pen, kds2, by = c("Title"))
 print(test)
+penstr <- test %>%
+   filter(Title == "Call Me By Your Name")
+
+kdsstr <- kds2 %>%
+  filter(Title == "Call Me By Your Name (Call Me By Your Name, #1)")
+
+kdsstr2 <- kds2 %>%
+  filter(Title == "Call Me By Your Name")
+
+print(kdsstr)
+print(penstr)
+print(kdsstr2)
+
+str <- "Call Me By Your Name (Call Me By Your Name, #1)"
+print(str)
+str <- sub(" \\(.*,.*#.*\\)", "", str)
+print(str)
+
+str <- "Nickel and Dimed: On (Not) Getting by in America"
+print(str)
+str <- sub(" \\(.*,.*#.*\\)", "", str)
+print(str)
 ```
 
-After successfully joining the descriptions and genres to the Pen data, it then came time to do the same with the political data, so all the data that everyone would use for the later sections of the project would all be found in one location.
+The Kaggle dataset used parenthesis to denote series, whereas the Pen dataset had a seperate column for that. That meant I would have to remove those series indicators from any titles where they were present. But, some books actually have parenthesis in their titles that would make the "remove anything between parenthesis" strategy do more harm than good. But, using the substitute function, matching against this chaotic string - "\\\\(.\*,.\*#.\*\\\\)" - we can remove only the series indicators, as demonstrated above. The matching string searches for opened and closed parenthesis, and uses 3 wildcards (asterisks - match to anything) to ensure that within the parenthesis is a comma and a pound sign, with anything before, in between or after. This matches to the series indicators, and the odds of any title having that punctuation in that order are slim.
+
+### Clean Data. *Finally.*
+
+With everything that the various failures above taught us, the code to actually clean the data was fairly short. Using a function delSeries, defined to remove the title indicators using the matching string above, and then mutating the Title column of the kaggle dataset by function delSeries to remove those series indicators for every book. From there, dropping a few unnecessary columns and joining the datasets left us with our original dataset, plus the descriptions and genres for almost every book, and seemingly all of the most commonly banned books
+
+```{r}
+delSeries <- function(x) sub(" \\(.*,.*#.*\\)", "", x) 
+                     
+kds2 <- kds2 %>%
+  mutate(across(2:2, delSeries))
+
+kds2 <- subset(kds2, select = c("Title", "Description","Genre"))
+
+test <- left_join(pen, kds2, by = c("Title"))
+```
+
+After successfully joining the descriptions and genres to the Pen data, it then came time to do the same with the political data, so all the data that everyone would use for the later sections of the project would all be found in one location. This was a very similar process to the prior data merging, and much simpler.
 
 ```{r}
 legis1 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/Legis_2021.csv")
@@ -198,6 +195,7 @@ legis2 <- legis2 %>% mutate(Year = "2022")
 
 legis3 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/Legis_2023.csv")
 legis3 <- legis3 %>% mutate(Year = "2023")
+#removing a stray column
 legis3 <- subset(legis3, select = -c(X))
 
 legis4 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/Legis_2024.csv")
@@ -208,16 +206,16 @@ legishalf1 <- rbind(legis1, legis2)
 legishalf2 <- rbind(legis3, legis4)
 
 legis <-rbind(legishalf1, legishalf2)
-print(legis)
+head(legis)
 print(legis %>% filter(STATE == "Total States"))
 legis <- subset(legis, legis$STATE != "Total States" )
 legis <- subset(legis, select = -c(Total.Seats, Total.Senate, Senate.Dem, Senate.Rep, Senate.other, Total.House, House.Dem, House.Rep, House.other))
 legis <- legis %>%
   rename( State = STATE)
-print(legis)
+head(legis)
 
 final <- left_join(test, legis, by = c("Year", "State"))
-print(final)
+head(final)
 ```
 
 ## The Application & Findings
@@ -229,7 +227,7 @@ One of the first things we wanted to look at was what was banned more often than
 
 cleaned_data <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/cleaned_data.csv")
 
-# The only reason why I (Amber) am not calling the final version of the dataset from the code above for all of our code is because of the difficulty I had in getting the cleaned data finish all the steps on my computer when putting them together.
+# The only reason why I (Amber) am not calling the final version of the dataset from the code above for all of our code is because of the difficulty I had in getting the cleaned data finish all theprint(test) steps on my computer when putting them together.
 ```
 
 ### Genres
@@ -1137,4 +1135,4 @@ Tada! We can see that once again, it's a select few counties that are skewing th
 
 But sheesh: you would think a state with "our liberties we prize" in their motto would let kids read what they want.
 
-# Participation 
+# Participation
