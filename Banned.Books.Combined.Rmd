@@ -1,0 +1,1140 @@
+---
+title: "Banned Books - At Least We're Not Burning Them"
+authors: "Lucas Deese, Amber Wolf, Enrique Espinonsa, Alexis Shermett"
+date: "2025-03-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install.packages("wordcloud2")
+#install.packages("tm")
+#install.packages("tidyverse")
+#install.packages("png")
+#install.packages("tidytext")
+#install.packages("stringr")
+#install.packages("ggplot2")
+#install.packages("sf")
+#install.packages("dplyr")
+#install.packages("RColorBrewer")
+library(tm)
+library(wordcloud2)
+library(tidyverse)
+library(png)
+library(tidytext)
+library(stringr)
+library(ggplot2)
+library(sf)
+library(dplyr)
+library(RColorBrewer)
+
+```
+
+# Overview
+
+## Question
+
+Our initial question was to see if we could find patterns surrounding the banning of books in schools around the United States (although we focused on the continuous U.S.). The question was intentionally broad, allowing us to look at everything from political information to book content. In the end, we ended up looking at which states had the most bans, what words were more frequently in the descriptions of banned books, the state political leaning and the banning of books, along with what genres were more frequently banned.
+
+## Data
+
+We used a number of datasets, 8 in total, from 3 different sources, to answer our various questions. 3 of our datasets are sourced from Pen America, where we got their banned books datasets for the [2021-2022 academic year](https://pen.org/book-bans/banned-book-list-2021-2022/), the [2022-2023 academic year](https://pen.org/book-bans/2023-banned-book-list/), and the [2023-2024 academic year](https://pen.org/book-bans/pen-america-index-of-school-book-bans-2023-2024/). These three datasets were the foundation of our project, and contained everything from the source of the challenge to the status of the book to the counties within the states they were challenged in. We didn't exhaust the possibilities of the dataset, but I think we came close. Added onto this were the 4 datasets from the [National Conference of State Legislatures](https://www.ncsl.org/about-state-legislatures/state-partisan-composition), comprising of the 4 years that were covered in the Pen datasets. These datasets had the majority political party in the legislature and government of each state for all four years. Lastly, our [Kaggle](https://www.kaggle.com/datasets/chielerli/banned-book-dataset?resource=download) dataset contained descriptions for many of the books in the Pen dataset. This data set also included genres that the book was considered.
+
+## Data cleaning
+
+The cleaning of this dataset was a rather arduous process, undertaken by Lucas. Lucas did all of the work in cleaning the data to be used for the rest of the project.
+
+# The Work
+
+## Cleaning Process
+
+First, we had to load the data into the project. As we were using Github to share our progress, Amber, when combining all of our code into one file, changed any personal computer locations to pull from the github instead. This allowed for us to then make any final changes without having to change where the data was being pulled from, along with making it so that everything was not being downloaded on 4 different computers.
+
+```{r load data in}
+
+p1_2 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/PEN%20America's%20Index%20of%20School%20Book%20Bans%20(July%201%2C%202021%20-%20June%2030%2C%202022)%20-%20Sorted%20by%20Author%20%26%20Title.csv")
+
+p2_3 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/PEN%20America's%20Index%20of%20School%20Book%20Bans%20(July%201%2C%202022%20-%20June%2030%2C%202023)%20-%20Sorted%20by%20Author%20%26%20Title.csv")
+
+p3_4 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/PEN%20America's%20Index%20of%20School%20Book%20Bans%20(July%201%2C%202023%20-%20June%2030%2C%202024)%20-%20Sorted%20by%20Author%20%26%20Title.csv")
+```
+
+Next Lucas tried the first attempt at cleaning the data.
+
+```{r cleaning func 1}
+
+#setColTitles <- function(data) {
+# data2 <- data[-1,]
+# colNames <- colnames(data2)
+# newColNames <- as.list(data2[1,])
+# print(data2)
+# for (x in colNames) {
+#   for (y in newColNames) {
+#     data2 <- data2 %>% rename( y = x )
+#   }
+# }
+ #data2 <- data2 %>% rename( "Author" = "X")
+# } 
+
+# setColTitles(p1_2)
+```
+
+In the end, he, long story short, realized that the above code is crap. Apparently, read_csv has a *skip* option, that does exactly what the above code was attempted to achieve. **Easily. In 8 characters.** Coding never fails to remind us of our own stupidity, but the trials led us to discover different features we didn't realize existed.
+
+Lucas then reimported the data that we got from Pen, renaming columns that changed names between the different years of data, along with adding columns to help match the years properly when the political data is added. Then, after making sure all the individual Pen datasets were in order, he binded them into one data set to then bind the next datasets onto.
+
+```{r re-import the pen data}
+p1_2 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/PEN%20America's%20Index%20of%20School%20Book%20Bans%20(July%201%2C%202021%20-%20June%2030%2C%202022)%20-%20Sorted%20by%20Author%20%26%20Title.csv", skip =2)
+p1_2 <- p1_2 %>% rename("Ban.Status" = "Type.of.Ban")
+p1_2 <- p1_2 %>% mutate(Series.Name = "Unknown")
+p1_2 <- p1_2 %>% mutate(Year = "2021")
+p1_2 <- p1_2 %>% mutate(E.Year = "2022")
+
+p2_3 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/PEN%20America's%20Index%20of%20School%20Book%20Bans%20(July%201%2C%202022%20-%20June%2030%2C%202023)%20-%20Sorted%20by%20Author%20%26%20Title.csv", skip =2)
+p2_3 <- p2_3 %>% mutate(Year = "2022")
+p2_3 <- p2_3 %>% mutate(E.Year = "2023")
+
+p3_4 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/PEN%20America's%20Index%20of%20School%20Book%20Bans%20(July%201%2C%202023%20-%20June%2030%2C%202024)%20-%20Sorted%20by%20Author%20%26%20Title.csv", skip=2)
+p3_4 <- p3_4 %>% rename("Origin.of.Challenge" = "Initiating.Action")
+p3_4 <- p3_4 %>% mutate(Year = "2023")
+p3_4 <- p3_4 %>% mutate(E.Year = "2024")
+
+pen <- rbind(p2_3, p1_2)
+pen <- rbind(pen, p3_4)
+print(pen)
+```
+
+After making sure that all of the Pen datasets were binded, next came adding the genres and descriptions for all of the books onto the data, ensuring that the descriptions properly matched up with the correct books. This was done by joining them by the title of the book and the author of the book, as those two columns were in both the Pen data and the Kaggle dataset that had the descriptions.
+
+```{r}
+kds <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/merged_dataset%20(1).csv")
+print(kds)
+
+# test <- left_join(pen, kds, by = c("Author", "Title"))
+# print(test)
+## causes way too many duplicates, doesn't actually work
+
+# test2 <- merge(pen, kds)
+# print(test2)
+## loses so much data
+
+# test <- left_join(pen, kds, by = c("Author"))
+# print(test)
+## even worse
+```
+
+As seen above, there were issues when trying to join the data by author, either with duplications occurring, loosing data, or not being able to match authors as the last and first names were reversed. This was a major issue when trying to join the data as the author names not being written the same led to descriptions not being able to be matched up by author as it would not recognize them as the same.
+
+```{r}
+kds2 <- distinct(kds, Title, .keep_all = TRUE)
+print(kds %>% filter(Title == "The Poet X"))
+print(kds2)
+print(pen)
+
+kds2 %>%
+  #select(Title) %>%
+  filter(Title == "The Poet X")
+```
+
+```{r}
+#test <- left_join(pen, kds2, by = c("Title"))
+#print(test)
+#penstr <- test %>%
+#   filter(Title == "Call Me By Your Name")
+
+#kdsstr <- kds2 %>%
+#  filter(Title == "Call Me By Your Name (Call Me By Your Name, #1)")
+
+#kdsstr2 <- kds2 %>%
+#  filter(Title == "Call Me By Your Name")
+
+#print(kdsstr)
+#print(penstr)
+#print(kdsstr2)
+
+#str <- "Call Me By Your Name (Call Me By Your Name, #1)"
+#print(str)
+#str <- sub(" \\(.*,#.*\\)", "", str)
+#print(str)
+
+#str <- "Nickel and Dimed: On (Not) Getting by in America"
+#print(str)
+#str <- sub(" \\(.*,#.*\\)", "", str)
+#print(str)
+```
+
+### A New Plan
+
+The new plan consisted of removing all dupes from the descriptions by writing a function that would append the descriptions to the array. A similar function would then be written to do the same write for the political data.
+
+```{r}
+kds2
+A <- function(x) sub(" \\(.*,.*#.*\\)", "", x) 
+                     
+kds2 <- kds2 %>%
+  mutate(across(2:2, A))
+#kds2 %>%
+  #filter(Title == "Call Me By Your Name (Call Me By Your Name, #1)")
+#kds2 %>%
+  #filter(Author == "André Aciman")
+
+kds2 <- kds2[c("Title", "Description","Genre")]
+
+test <- left_join(pen, kds2, by = c("Title"))
+print(test)
+```
+
+After successfully joining the descriptions and genres to the Pen data, it then came time to do the same with the political data, so all the data that everyone would use for the later sections of the project would all be found in one location.
+
+```{r}
+legis1 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/Legis_2021.csv")
+legis1 <- legis1 %>% mutate(Year = "2021")
+
+
+legis2 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/Legis_2022.csv")
+legis2 <- legis2 %>% mutate(Year = "2022")
+
+
+legis3 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/Legis_2023.csv")
+legis3 <- legis3 %>% mutate(Year = "2023")
+legis3 <- subset(legis3, select = -c(X))
+
+legis4 <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/Legis_2024.csv")
+legis4 <- legis4 %>% mutate(Year = "2024")
+
+
+legishalf1 <- rbind(legis1, legis2)
+legishalf2 <- rbind(legis3, legis4)
+
+legis <-rbind(legishalf1, legishalf2)
+print(legis)
+print(legis %>% filter(STATE == "Total States"))
+legis <- subset(legis, legis$STATE != "Total States" )
+legis <- subset(legis, select = -c(Total.Seats, Total.Senate, Senate.Dem, Senate.Rep, Senate.other, Total.House, House.Dem, House.Rep, House.other))
+legis <- legis %>%
+  rename( State = STATE)
+print(legis)
+
+final <- left_join(test, legis, by = c("Year", "State"))
+print(final)
+```
+
+## The Application & Findings
+
+One of the first things we wanted to look at was what was banned more often than not. This consists of what genres were more banned than other, which words were most frequently in the descriptions of banned books, along with what the most banned book out of this data was.
+
+```{r}
+# For all of us, as we did our work on our own computers, we called in the dataset that Lucas gave us. While we all named it differently in our own work, it will share a name for ease of code.
+
+cleaned_data <- read.csv("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/cleaned_data.csv")
+
+# The only reason why I (Amber) am not calling the final version of the dataset from the code above for all of our code is because of the difficulty I had in getting the cleaned data finish all the steps on my computer when putting them together.
+```
+
+### Genres
+
+First off is a look at what genres were most banned out of the data. For this, it is presented in the form of a wordcloud and a bar graph, with the bar graph showing only the top 10 most banned/challenged genres.
+
+Amber worked on this section, focusing primarily on the wordclouds. The code to get the genres to load correctly was originally done by Alexis on her section, only being adjusted in order to show the different genres. First was making a list of keywords of genres that were in the data. These consisted of genres like Fiction, Romance, Science Fiction, and Graphic Novels.
+
+```{r}
+genrekeywords <- c("Young Adult", "Contemporary", "Romance", "Fiction", "Audiobook","Young Adult Contemporary", "Historical Fiction", "Nonfiction", "Middle Grade", "History", "Childrens", "Realistic Fiction", "Mystery Thriller", "Mystery", "Thriller", "Biography", "American History", "Poetry", "nullYoung Adult", "nullPoetry", "nullFiction","Humor", "Fantasy", "Biography Memoir","Teen", "Horror", "Thriller", "Adult", "New Adult", "Graphic Novels", "Comics", "Classics", "Autobiography", "Memoir", "Urban Fantasy", "Paranormal Romance", "Science Fiction", "Paranormal", "nullFantasy","Young Adult Fantasy", "Fairy Tales", "Speculative Fiction", "Literary Fiction", "Adventure", "Sports", "True Crime", "Crime", "Adult Fiction", "Picture Books", "M M Romance", "Action", "Science Fiction Fantasy", "Graphic Novels Comics","nullNonfiction", "nullGraphic Novels", "nullMiddle Grade", "Art", "Space", "Nature", "Short Stories", "Anthologies", "High Fantasy", "nullPicture Books", "Juvenile", "nullRealistic Fiction", "Biography Memoir", "nullHistorical Fiction", "nullRomance", "Novella", "Contemporary Romance", "Historical Romance", "Fantasy Romance", "Science", "Education", "Manga",   "Paranormal Romance", "Textbooks", "Diary", "Flash Fiction", "Fairy Tale Retellings","Womens Fiction", "Contemporary fiction", "Young Adult Historical Fiction", "Science fiction", "military science fiction", "Military Fiction")
+
+cleaned_data$genres <- paste(cleaned_data$Genre, sep = " ")
+cleaned_data$genres <- tolower(ifelse(is.na(cleaned_data$genres), "", cleaned_data$genres))
+
+clean_names_g <- c()
+
+for (word in genrekeywords) {
+  colname <- str_replace_all(word, "\\s+|\\+", "_")
+  pattern <- paste0("\\b", word, "\\b")
+  cleaned_data[[colname]] <- ifelse(str_detect(cleaned_data$genres, regex(pattern, ignore_case = TRUE)), 1, 0)
+  clean_names_g <- c(clean_names_g, colname)}
+```
+
+After making the list of keywords, it then went down to cleaning the genres and counting.
+
+```{r}
+genre_counts <- cleaned_data %>%
+  filter(!is.na(Genre)) %>% 
+  select(Genre, all_of(clean_names_g)) %>%
+  group_by(Genre) %>%
+  summarise(across(everything(), sum)) %>%
+  pivot_longer(-Genre, names_to = "Genres", values_to = "Count")
+
+genrecountdf <- genre_counts %>% select(-Genre)
+
+genrecountdfclean <- genrecountdf %>%
+  group_by(Genres) %>%
+  summarize(across(everything(), sum, na.rm = TRUE))
+
+#This code got the genres to all be in their own row with a total count, but neglected the fact that the ones titled null[NAME] were thier own categories. This was fixed by renaming these rows to match the non null of that name and then merge them.
+
+genrecountfinal <- genrecountdfclean
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullFantasy"] <- "Fantasy"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullFiction"] <- "Fiction"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullGraphic_Novels"] <- "Graphic_Novels"
+   genrecountfinal$Genres[genrecountfinal$Genres == "nullHistorical_Fiction"] <- "Historical_Fiction"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullMiddle_Grade"] <- "Middle_Grade"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullNonfiction"] <- "Nonfiction"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullPicture_Books"] <- "Picture_Books"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullPoetry"] <- "Poetry"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullRealistic_Fiction"] <- "Realistic_Fiction"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullRomance"] <- "Romance"
+  genrecountfinal$Genres[genrecountfinal$Genres == "nullYoung_Adult"] <- "Young_Adult"
+  
+  genrecount_final <- genrecountfinal %>%
+  group_by(Genres) %>%
+  summarize(across(everything(), sum, na.rm = TRUE))
+```
+
+Finally came the wordcloud of the data.
+
+```{r}
+wordcloud2(genrecount_final, color = "blue")
+```
+
+What we can see with this wordcloud is that adult books were one of the most banned books. When looking at the data, fiction should be the most banned, however, by adjusting the size of the words on the word cloud, fiction may be seen.
+
+After this, to demonstrate the top 10 genres that were banned, a bar plot was made. Thiis was just another way of representing the data rather than the word cloud to get the point across.
+
+```{r}
+top_10_genres <- genrecount_final %>% 
+  slice_max(order_by = Count, n = 10)
+
+ggplot(top_10_genres, aes(x = Genres, y = Count)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Fiction being the most banned book is best seen through the bar graph in relation to the other top 10 banned book genres. After fiction came adult and young adult books, which could be because of where they are being banned, such as in elementary schools. This would not be known by the data, but this at least shows us which genres were most banned.
+
+### Descriptions
+
+Next comes the descriptions of the books. With this, the data had to be cleaned in order to separate the words from one another. This allowed us to see which words appeared the most often, with the exeption that stopwords were removed.
+
+```{r cleaning descriptions}
+Descriptions_Unedited <- select(cleaned_data, Description)
+
+desc_corpus <- Corpus(VectorSource(Descriptions_Unedited))
+desc_lower <- tm_map(desc_corpus, content_transformer(tolower)) #making all of it lowercase
+desc_punc <- tm_map(desc_lower, removePunctuation) #removing any punctuation
+desc_num <- tm_map(desc_punc, removeNumbers) #removing numbers
+desc_stop <- tm_map(desc_num, removeWords, stopwords("english")) #removing the typical English stopwords, such as a, and, and most pronouns
+desc_clean <- tm_map(desc_stop, stripWhitespace) #this then removes any whitespace from the individual words.
+```
+
+After cleaning the data, the words were counted to then be put into the wordcloud.
+
+```{r counting}
+#Descriptions
+desc_tdm <- TermDocumentMatrix(desc_clean)
+m <- as.matrix(desc_tdm)
+word_freqs <- sort(rowSums(m), decreasing = TRUE)
+desc_df <- data.frame(word = names(word_freqs), freq = word_freqs)
+```
+
+```{r wordcloud}
+wordcloud2(desc_df, color = "blue")
+```
+
+The word life appears to be the biggest word on the wordcloud, however, with the words by themselves, we do not know exactly why the word life appears the most in the descriptions of banned books. One word that may make more sense to find a bit bigger is the word sex, as this may be refering to sexuality and LGBTQ+ topics or adult novels which include the topic.
+
+After looking at these, we decided to look to see which book was the most banned.
+
+### What was the most banned book?
+
+This sextion was done by Alexis, who looked to see which book was the most banned, and eventually the frequency of the ban of the book.
+
+```{r}
+most_banned_book <- cleaned_data %>%
+  count(Title, sort = TRUE) %>%
+  slice(1) %>%
+  pull(Title)
+
+# Crank appears as most banned book
+states_banned <- cleaned_data %>%
+  filter(Title == most_banned_book) %>%
+  distinct(State) %>%
+  pull(State)
+
+cat("Most banned book:", most_banned_book, "\n")
+# Crank appears as most banned book 
+cat("States that banned it:\n")
+print(states_banned)
+
+```
+
+This code allows us to see that Crank was the most banned book in the dataset. It was banned by 19 states.
+
+```{r}
+crank_data <- cleaned_data %>%
+  filter(Title == most_banned_book)
+
+```
+
+#### Frequency of Crank's ban (categorized by state political control)
+
+After finding that Crank was the most banned book, we were interested in see the frequency of the ban, especially concerning the political control of the states.
+
+```{r}
+#  frequency of bans by year
+ggplot(crank_data, aes(x = factor(Year), fill = State.Control)) +
+  geom_bar() +
+   scale_fill_manual(
+    values = c("Rep" = "red", "Dem" = "blue", "Divided" = "purple", "N/A" = "gray"),
+    labels = c("Rep" = "Republican", "Dem" = "Democrat", "Divided" = "Divided")
+  ) +
+  labs(
+    title = "Yearly Frequency of *Crank* Bans by Ellen Hopkins",
+    subtitle = "Categorized by State Political Control",
+    x = "Year", y = "Number of Bans",
+    fill = "State Political Control"
+  ) +
+  theme_minimal()
+
+```
+
+We can see a dramatic increase in bans of the book "Crank" in 2023, the year after book banning bills were introduced.
+
+#### Bans and Pending Bans of Crank in States and their Political Control
+
+After looking at the party control of the state governments, it was an interesting topic to see the status of the ban of the book and the political control of the state.
+
+```{r echo=TRUE, fig.height=8, fig.width=15}
+
+# Step 1: Add Ban.Category
+crank_data <- cleaned_data %>%
+  filter(Title == "Crank") %>%
+  mutate(Ban.Category = case_when(
+    grepl("Pending Investigation", Ban.Status, ignore.case = TRUE) ~ "Pending",
+    grepl("Banned", Ban.Status, ignore.case = TRUE) ~ "Banned",
+    TRUE ~ "Other"
+  ))
+
+# Step 2: Summarize by State, Category, and Political Control
+ban_combined <- crank_data %>%
+  group_by(State, Ban.Category, State.Control) %>%
+  summarise(Count = n(), .groups = "drop")
+
+# Step 3: Plot
+ggplot(ban_combined, aes(x = reorder(State, -Count), y = Count, fill = State.Control)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+  facet_wrap(~Ban.Category, scales = "free_y") +
+  coord_flip() +
+  scale_fill_manual(
+    values = c("Rep" = "red", "Dem" = "blue", "Divided" = "purple", "N/A" = "gray"),
+    labels = c("Rep" = "Republican", "Dem" = "Democrat", "Divided" = "Divided", "N/A" = "N/A")
+  ) +
+  labs(
+    title = "Bans and Pending Investigations of *Crank* by Ellen Hopkins",
+    subtitle = "Categorized by State and Political Control",
+    x = "State", y = "Number of Challenges",
+    fill = "State Political Control"
+  ) +
+  theme_minimal()
+
+```
+
+We can see that Iowa and Florida were number 1 and 2 in banning this book and that some bans are still pending. Florida and Iowa being number 1 and 2 in banning this book will become relevant when we look at which states ban the most books.
+
+### Book bans by Political Party
+
+Before we look at the United States as a whole and then the top 2 states in banning books, we wanted to look at the idea of if different politically controlled states ban more or less books than one another.
+
+```{r}
+leg_control_counts <- cleaned_data %>% 
+  group_by(Year, State, Leg.Control) %>% 
+  summarise(Count = n(), .groups = 'drop') %>% 
+    mutate(Leg.Control = recode(Leg.Control,
+                              "Dem" = "Democratic",
+                              "Rep" = "Republican"))
+
+leg_control_counts
+
+ggplot(leg_control_counts, aes(x = factor(Year), y = Count, fill = Leg.Control)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  scale_fill_manual(
+    values = c(
+      "Democratic" = "blue",
+      "Republican" = "red",
+      "Divided" = "purple",
+      "N/A" = "gray"
+    )
+  ) + 
+  labs(
+    title = "Do State's with Republican Controlled Legislatures Ban More Books?", 
+    subtitle = "It would appear so", 
+    caption = "N/A refers to Nebraska, which has a nonpartisan unicameral legislature",
+    x = "Year",
+    y = "Banned Books Count", 
+    fill = "Party in Legislative control"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle= 45, hjust =1))
+
+```
+
+#### State by State - faceted
+
+```{r echo=TRUE, fig.height=20, fig.width=20}
+
+# Faceted bar plot by state
+ggplot(leg_control_counts, aes(x = factor(Year), y = Count, fill = Leg.Control)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  facet_wrap(~ State, scales = "free_y", ncol = 6) +  # Facet by state
+  scale_fill_manual(
+    values = c(
+      "Democratic" = "blue",
+      "Republican" = "red",
+      "Divided" = "purple",
+      "N/A" = "gray"
+    ), 
+    breaks = c("Republican", "Democratic", "Divided", "N/A")
+  ) + 
+  labs(
+    title = "Now Lets Look at Each State! Do States with Republican Controlled Legislatures Ban More Books?",
+    subtitle = "Overwhemlingly so...",
+    caption = "N/A refers to Nebraska, which has a nonpartisan unicameral legislature",
+    x = "Year",
+    y = "Banned Books Count",
+    fill = "Party in Legislative Control"
+  ) +
+  theme_light(base_size = 12) +
+     theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    plot.subtitle = element_text(size = 15, margin = margin(b = 10)),
+    plot.caption = element_text(size = 15, hjust = 0),
+    axis.text.x = element_text(size = 18, angle = 45, hjust = 1),
+    axis.title = element_text(face = "bold", size = 14),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold", size = 13)
+  )
+
+```
+
+#### By Governor's Party
+
+```{r echo=TRUE}
+gov_party_counts <- cleaned_data %>% 
+  group_by(Year, State, Gov.Party) %>% 
+  summarise(Count = n(), .groups = 'drop') %>%
+    mutate(Gov.Party = recode(Gov.Party,
+                              "Dem" = "Democratic",
+                              "Rep" = "Republican"))
+
+ggplot(gov_party_counts, aes(x = factor(Year), y = Count, fill = Gov.Party)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  scale_fill_manual(
+    values = c(
+      "Democratic" = "blue",
+      "Republican" = "red",
+      "Divided" = "purple",  # in case it appears
+      "N/A" = "gray"
+    )
+  ) + 
+  labs(
+    title = "Do States with Republican Governors Ban More Books?",
+    subtitle = "It would appear so",
+    x = "Year",
+    y = "Banned Books Count",
+    fill = "Governor's Party"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+```
+
+#### Top 10 States with most banned books - Incorporating State Political Leanings
+
+```{r echo=TRUE}
+top_states <- cleaned_data %>%
+  group_by(State) %>%
+  summarise(Total_Bans = n(), .groups = "drop") %>%
+  arrange(desc(Total_Bans)) %>%
+  slice_head(n = 10) %>% 
+  pull(State)
+
+
+top_states_by_year <- cleaned_data %>% 
+  filter(State %in% top_states) %>%
+  group_by(Year, State, Leg.Control, Gov.Party) %>%
+  summarise(X = n(), .groups = "drop") %>%
+  mutate(
+    Leg.Control = recode(Leg.Control,
+                         "Dem" = "Democratic",
+                         "Rep" = "Republican")
+  ) %>% 
+  arrange(desc(X))
+
+top_states_by_year
+  
+```
+
+#### Visualization with faceted heat map
+
+```{r echo=TRUE}
+ggplot(top_states_by_year, aes(x = factor(Year), y = reorder(State, desc(State)), fill = X)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "orange", high = "red") +
+  facet_wrap(~Leg.Control) + 
+  labs(
+    title = "10 States With Most Banned Books by Year and Legislative Control",
+    subtitle = "Darker tiles indicate more bans",
+    caption = 'Note: "Divided" refers to states where the party controlling the legislature 
+differs from the party of the governor.',
+    x = "Year",
+    y = "State",
+    fill = "Banned Books Count",
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+    strip.text = element_text(size = 10, face = "bold"),
+    panel.grid = element_blank(),
+     plot.caption = element_text(size = 10, hjust = 0) 
+  )
+```
+
+#### Origin of Challenge
+
+From <https://pen.org/report/banned-usa-growing-movement-to-censor-books-in-schools/#heading-7> Legislative efforts to pass educational "gag orders"; some state legislators proposing or supporting bills that impact the selection and removal of books in school classrooms and libraries
+
+Flordia's Parental Rights in Education law signed March 2022 - referred to as the "Don't Say Gay" law
+
+Georgia SB26 passed March 22 makes it easier to remove books with "offensive content"
+
+Tennessee SB2247 makes it easier for books to be banned form studnet access statewide on the basis of challenges filed in individual districts
+
+Utah HB 374 Sensitive Materials in Schools signed into law March 2022 - prohibits sensitive instructura materials considered pornographic or indecent.
+
+Missouri SB 775 - amendment that makes it Class A misdemeanor if person “affiliated with a public or private elementary or secondary school” provides “explicit sexual material” to a student. St. Louis area school districts reacted preemptively by remobing books, especially graphic novels
+
+```{r echo=TRUE}
+origin_trends <- cleaned_data %>%
+  filter(!is.na(Origin.of.Challenge)) %>%
+  group_by(Year, Origin.of.Challenge) %>%
+  summarise(X = n(), .groups = "drop") %>%
+  arrange(desc(X))
+
+origin_trends
+```
+
+```{r echo=TRUE}
+ggplot(origin_trends, aes(x = factor(Year), y = X, color = Origin.of.Challenge, group = Origin.of.Challenge)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+   scale_color_manual(
+    values = c(
+      "Administration" = "#d73027",
+      "Formal Challenge" = "#4575b4",
+      "Administrator" = "#fdae61",
+      "Informal Challenge" = "#66bd63",
+      "Informal Challenge, Administration" = "#fee08b",
+      "Administration/Formal Challenge" = "green",
+      "Legislative Action" = "#9e0142",
+      "Administration/Informal Challnge" = "grey",
+      "Other"= "lightblue",
+      "Unclear" = "purple",
+      "Formal Challenge, Administration" = "pink"
+    ),
+    na.translate = FALSE  # avoid NA color showing up if not desired
+  ) +
+  labs(
+    title = "Trends in Book Ban Challenges by Origin",
+    subtitle = "Who is initiating the bans?",
+    x = "Year",
+    y = "Number of Banned Book Entries",
+    color = "Origin of Challenge"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "right"
+  )
+
+```
+
+```{r echo=TRUE}
+origin_trends_focus <- cleaned_data %>%
+  filter(!is.na(Origin.of.Challenge)) %>%
+  mutate(
+    Challenge_Type = case_when(
+      grepl("Administration|Administrator", Origin.of.Challenge, ignore.case = TRUE) ~ "Administrative",
+      grepl("Legislative|Legislature", Origin.of.Challenge, ignore.case = TRUE) ~ "Legislative",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Challenge_Type)) %>%
+  group_by(Year, Challenge_Type) %>%
+  summarise(Count = n(), .groups = "drop")
+
+origin_trends_focus
+```
+
+```{r echo=TRUE}
+ggplot(origin_trends_focus, aes(x = factor(Year), y = Count, color = Challenge_Type, group = Challenge_Type)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Trends in Book Ban Challenges: Administration vs. Legislative",
+    subtitle = "2021, 2022, and 2023 counts of bans initiated by administrative or legislative action",
+    x = "Year",
+    y = "Number of Banned Book Entries",
+    color = "Origin of Challenge"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom")
+```
+
+#### What states had legislative action as origin of challenge?
+
+```{r echo=TRUE}
+
+
+# Filter for legislative origin of challenge
+legislativeaction_states <- cleaned_data %>%
+  filter(grepl("Legislative", Origin.of.Challenge, ignore.case = TRUE)) %>%
+  group_by(State) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  arrange(desc(Count))
+
+legislativeaction_states
+# Bar plot of states with legislative-origin bans
+ggplot(legislativeaction_states, aes(x = reorder(State, Count), y = Count)) +
+  geom_col(fill = "#9e0142") +
+  coord_flip() +
+  labs(
+    title = "States with Book Bans Originating from Legislative Action",
+    subtitle = "Filtered by entries that include 'legislative' in origin",
+    caption = " Note that Missouri, Florida, Utah, Viriginia had Republican Legislatures in 2022",
+    x = "State",
+    y = "Number of Banned Book Entries",
+  ) +
+  theme_minimal()
+
+```
+
+#### Did increased legislative action in 2022 lead to a surge of administrative challenges the following year?
+
+```{r echo=TRUE}
+admin_states_2023 <- cleaned_data %>%
+  filter(Year == 2023,
+         grepl("Administration|Administrator", Origin.of.Challenge, ignore.case = TRUE)) %>%
+  group_by(State) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  arrange(desc(Count))
+
+# Plot
+ggplot(admin_states_2023, aes(x = reorder(State, Count), y = Count)) +
+  geom_col(fill = "#d73027") +
+  coord_flip() +
+  labs(
+    title = "States with Administrative-Origin Book Bans in 2023",
+    x = "State",
+    y = "Number of Banned Book Entries",
+    subtitle = "Filtered by 'Administration' or 'Administrator' in origin field",
+  ) +
+  theme_minimal()
+```
+
+```{r echo=TRUE}
+
+# Extract counts by Year and Origin Type
+leg_admin_trends <- cleaned_data %>%
+  filter(!is.na(Origin.of.Challenge)) %>%
+  mutate(
+    Challenge_Type = case_when(
+      grepl("Legislative", Origin.of.Challenge, ignore.case = TRUE) ~ "Legislative",
+      grepl("Administration|Administrator", Origin.of.Challenge, ignore.case = TRUE) ~ "Administrative",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Challenge_Type)) %>%
+  group_by(Year, Challenge_Type) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  filter(Year %in% c(2021, 2022, 2023))  # focus on key years
+
+# Plot
+ggplot(leg_admin_trends, aes(x = factor(Year), y = Count, fill = Challenge_Type)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("Legislative" = "#9e0142", "Administrative" = "#d73027")) +
+  labs(
+    title = "Did 2022 Legislative Action Lead to 2023 Administrative Challenges?",
+    subtitle = "Comparing counts of legislative and administrative-origin book bans by year, it would appear so!",
+    x = "Year",
+    y = "Number of Banned Book Entries",
+    fill = "Challenge Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+#### Political Party and certain themes
+
+```{r echo=TRUE}
+keywords <- c("immigrant", "black", "lgbtq", "queer", "gay", "romance", 
+              "sex", "gender", "mental health", "abuse", "drugs", "lesbian",
+              "nonbinary", "racism", "rape", "segregation", "addiction", "depression", "World War", "feminism", "native american", "mexican", "hispanic", "african american", "jewish", "transgender", "rights", "activism")
+
+# Step 2: Preprocess the full text
+cleaned_data$full_text <- paste(cleaned_data$Title, cleaned_data$Description, cleaned_data$Series.Name, sep = " ")
+cleaned_data$full_text <- tolower(ifelse(is.na(cleaned_data$full_text), "", cleaned_data$full_text))
+
+# Step 3: Generate indicator columns
+clean_names <- c()  # Store cleaned column names to use later
+
+for (word in keywords) {
+  colname <- str_replace_all(word, "\\s+|\\+", "_")
+  pattern <- paste0("\\b", word, "\\b")
+  cleaned_data[[colname]] <- ifelse(str_detect(cleaned_data$full_text, regex(pattern, ignore_case = TRUE)), 1, 0)
+  clean_names <- c(clean_names, colname)
+}
+
+cleaned_data$State.Control <- recode(cleaned_data$State.Control,
+                                 "Rep" = "Republican",
+                                 "Dem" = "Democrat")
+
+# Step 4: Create theme count summary
+theme_counts <- cleaned_data %>%
+  filter(!is.na(State.Control)) %>% 
+  select(State.Control, all_of(clean_names)) %>%
+  group_by(State.Control) %>%
+  summarise(across(everything(), sum)) %>%
+  pivot_longer(-State.Control, names_to = "Theme", values_to = "Count")
+
+# Optional: clean up theme labels
+theme_counts$Theme <- str_replace_all(theme_counts$Theme, "_", " ") %>% str_to_title()
+
+party_colors <- c(
+  "Republican" = "red",
+  "Democrat" = "blue",
+  "Divided" = "purple"
+)
+
+
+# Step 5: Plot it
+ggplot(theme_counts, aes(x = reorder(Theme, Count), y = Count, fill = State.Control)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = party_colors, name = "State Control") +
+  coord_flip() +
+  labs(title = "Themes in Banned Books by State Political Control",
+       subtitle = "Based on Title, Description, and Series Name",
+       caption = 'Note: "Divided" refers to states where the party controlling the legislature 
+differs from the party of the governor.',
+       x = "Theme", y = "Number of Books Mentioning Theme") +
+  theme_minimal()
+```
+
+Finally, after looking at the different aspects of the political party in control of the states we get to see the US as a whole and which states banned more or less books.
+
+### US County Data
+
+Enrique spent his time working on this aspect of the project.
+
+After an entire weekend spent finagling with a "Choropleth" map (had no clue that was even a word, but okay), I was finally able to create a decent-looking map of the contiguous US that shows data by county.
+
+Besides the regular libraries that are loaded for projects (dplyr and ggplot2), we have a new one that had to be downloaded: sf. This library allows us to create visual representations of data using .geojson files (in simple terms, make maps out of data).
+
+#### Checking Out Our Map
+
+Let's check out our default graph, pulled off the internet and saved on our local disk:
+
+```{r}
+my_sf <- read_sf("https://raw.githubusercontent.com/TheSillypants/BannedBooks/main/Counties.geojson")
+plot(st_geometry(my_sf))
+```
+
+Well, that doesn't look nice. Since Alaska has a county WAY out on the right, the graph is really zoomed out. Since we're only concerned with the contiguous US, let's take out anything that isn't connected to the landmass (sorry, Puerto Rico).
+
+```{r}
+usa1 <- my_sf[my_sf$STATEFP != "02", ]
+usa2 <- usa1[usa1$STATEFP != 15, ]
+usa <- usa2[usa2$STATEFP != 72, ]
+plot(st_geometry(usa))
+```
+
+That's much better. The map is much more zoomed in, letting us see each individual county much better. Let's pull some random data from the R database: the unemployment data for each county. Furthermore, let's go ahead and format this data to be compatible with our .geojson file.
+
+```{r}
+library(maps)
+data(unemp)
+unemp$unemp <- as.numeric(unemp$unemp)
+unemp %>% ggplot(aes(x = unemp))
+geom_histogram(bins = 20, fill = "#69b3a2", color = "white")
+```
+
+That formats our data to comply with our map. Finally, let's pull one last library we need, and map our data.
+
+```{r}
+my_colors <- brewer.pal(9, "Blues")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_country <- cut(unemp$unemp, 30)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(usa), col = my_colors, bg = "#A6CAE0")
+```
+
+Ta-da! Our data is mapped correctly into our map. The frequency of unemployment is mapped so that the more occurrences happen in a county, the darker that county is.
+
+Pretty efficient way to map spatial data, in my opinion.
+
+### US States
+
+But what if we wanted to look at data on a state-wide level? Let's pull up another .json file that measures only the states.
+
+```{r}
+my_sf2 <- read_sf("https://raw.githubusercontent.com/TheSillypants/BannedBooks/refs/heads/main/gz_2010_us_040_00_500k.json")
+plot(st_geometry(my_sf2))
+```
+
+Right, we still have Hawaii and Alaska (and Puerto Rico). Let's take them out again:
+
+```{r}
+usa21 <- my_sf2[my_sf2$STATE != "02", ]
+usa22 <- usa21[usa21$STATE != 15, ]
+usastates <- usa22[usa22$STATE != 72, ]
+plot(st_geometry(usastates))
+```
+
+There we go, much better. Let's map the same dataset onto the state-level map now. And just for fun, let's do it in purple.
+
+```{r}
+my_colors <- brewer.pal(9, "Purples")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_country <- cut(unemp$unemp, 30)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(usastates), col = my_colors, bg = "#A6CAE0")
+```
+
+Nice! No matter what our .json file covers, we can map data to it.
+
+### Concerning Our Dataset
+
+With the dataset that pertains to our project loaded, we can look at which states ban the most books.
+
+Let's map our state-level data first; to do that, we need to count how many times each state appears in the data:
+
+```{r}
+state_counts_test <- cleaned_data %>%
+  count(State)
+```
+
+Now, let's join that with our .json file.
+
+```{r}
+map_data <- left_join(usastates, state_counts_test, by = c("STATE" = "State"))
+```
+
+Ok, that's not good. They're mapping by order, not by name. Let's try and factor that in:
+
+```{r}
+usastates_sorted <- usastates[order(usastates$NAME), ]
+state_counts_test_sorted <- state_counts_test[order(state_counts_test$State), ]
+map_data_sorted <- map_data[order(map_data$NAME), ]
+
+colnames(state_counts_test_sorted)[colnames(state_counts_test_sorted) == "State"] <- "NAME"
+
+```
+
+Now that everything's in order alphabetically, let's merge the data again:
+
+```{r}
+map_data_sorted <- merge(map_data_sorted, state_counts_test_sorted, by = "NAME", all.x = TRUE)
+```
+
+That's looking much better. Now, let's map the data to our .json file.
+
+```{r}
+my_colors <- brewer.pal(9, "Reds")
+my_colors <- colorRampPalette(my_colors)(300)
+class_of_country <- cut(map_data_sorted$n.y, 300)
+my_colors <- my_colors[as.numeric(class_of_country)]
+plot(st_geometry(map_data_sorted), col = my_colors, bg = "#A6CAE0")
+```
+
+There it is! We can see that Florida bans the most books, by far. It's actually skewing the data by a lot. We've also done the map in red so that the subtleties between each state are noted. Finally, any state for which data was not found is mapped in blue.
+
+This poses an interesting question: which counties in the top two states ban the most books?
+
+Let's go back to our county .json file and isolate Florida first:
+
+```{r}
+florida <- my_sf[my_sf$STATEFP == 12, ]
+plot(st_geometry(florida))
+```
+
+There are the Floridian counties. Now, we need to isolate our data:
+
+```{r}
+cleanflorida <- cleaned_data[cleaned_data$State == "Florida", ]
+```
+
+Now we have all the occurrences of Florida in the dataset, but there's just one problem: in our .json file, the counties are named by county name only, while in our dataset, they have extra words. Let's try removing any occurence of extra words (and take out any whitespace as well):
+
+```{r}
+cleanfloridacounty <- gsub("county|district|school|schools|public|of| |the", "", cleanflorida$District, ignore.case = TRUE)
+cleanfloridacounties <- trimws(cleanfloridacounty)
+
+```
+
+Yeesh. That worked a little too well. Counties like "Palm Beach" that are composed of two words now are composed of only one.
+
+Since there's no automated solution that works successfully (and I've tried them all), the only thing is to fix each one manually, which is pretty tedious:
+
+```{r}
+cleanfloridacounties_df <- data.frame(District = cleanfloridacounties)
+
+cleanfloridacounties_df$District <- gsub("PalmBeach", "Palm Beach", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("IndianRiver", "Indian River", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("SantaRosa", "Santa Rosa", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("St.Lucie", "St. Lucie", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("St.Johns", "St. Johns", cleanfloridacounties_df$District)
+cleanfloridacounties_df$District <- gsub("St.John's", "St. Johns", cleanfloridacounties_df$District)
+
+
+cleanfloridacounties_df_done <- cleanfloridacounties_df
+```
+
+Finally, we have the right place names. Let's count how many times each one of those places occurs.
+
+```{r}
+cleanfl_c_count <- cleanfloridacounties_df_done %>%
+  count(District)
+```
+
+Now that we have that, it's time to go through the tedious process of organizing each value to where it goes and- wait. What about this: R can combine two datasets if they both have the same name for a column. What if we change the name of the column for the counties in Florida to be compatible with the .json file...
+
+```{r}
+colnames(cleanfl_c_count)[colnames(cleanfl_c_count) == "District"] <- "NAME"
+```
+
+...order the .json file alphabetically...
+
+```{r}
+florida_sort <- florida[order(florida$NAME), ]
+```
+
+...and then merge the two datasets?
+
+```{r}
+florida_fullsort <- merge(florida_sort, cleanfl_c_count, by = "NAME", all.x = TRUE)
+```
+
+Nice! Each data point goes to the county it corresponds to. Let's map the data now:
+
+```{r}
+library(RColorBrewer)
+my_colors <- brewer.pal(9, "Reds")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_fl_county <- cut(florida_fullsort$n, 30)
+my_colors <- my_colors[as.numeric(class_of_fl_county)]
+plot(st_geometry(florida_fullsort), col = my_colors, bg = "#A6CAE0")
+```
+
+Bang! Our .json file maps correctly! Once again, it seems as though one county (Escambia) is skewing the entire dataset. We've got it in red again to show the changes between the counties, and any blue county has no data.
+
+Now let's do the same for Iowa:
+
+```{r}
+iowa <- my_sf[my_sf$STATEFP == 19, ]
+plot(st_geometry(iowa))
+```
+
+```{r}
+cleaniowa <- cleaned_data[cleaned_data$State == "Iowa", ]
+```
+
+```{r}
+cleaniowacounty <- gsub("county|district|school|schools|public|of| |the|community", "", cleaniowa$District, ignore.case = TRUE)
+cleaniowacounties <- trimws(cleaniowacounty)
+```
+
+Much more things to correct this time around, but eh, c'est la vie:
+
+```{r}
+cleaniowacounties_df <- data.frame(District = cleaniowacounties)
+
+cleaniowacounties_df$District <- gsub("CedarFalls", "Cedar Falls", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("CentralLyon", "Central Lyon", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("CentralSprings", "Central Springs", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("ClaytonRidge", "Clayton Ridge", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("ClearCreek-Amana", "Clear Creek-Amana", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("ClearLake", "Clear Lake", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("CouncilBluffs", "Council Bluffs", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("DallasCenter-Grimes", "Dallas Center-Grimes", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("Dike-NewHartford", "Dike-New Hartford", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("EastUnion", "East Union", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("ForestCity", "Forest City", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("GrundyCenter", "Grundy Center", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("Interstate35", "Interstate 35", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("IowaCity", "Iowa City", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("LakeMills", "Lake Mills", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("MaquoketaValley", "Maquoketa Valley", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("MarionIndependent", "Marion", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("MasonCity", "Mason City", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("MissouriValley", "Missouri Valley", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("NewHampton", "New Hampton", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("NodawayValley", "Nodaway Valley", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("NorthPolk", "Polk", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("NorthwoodKensett", "Northwood Kensett", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("PocahontasArea", "Pocahontas Area", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("RedOak", "Red Oak", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("RidgeView", "Ridge View", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("RiverValley", "River Valley", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SiouxCenter", "Sioux Center", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SiouxCity", "Sioux City", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouastPolk", "Polk", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouastWarren", "Warren", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouthCentralCalhoun", "Calhoun", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouthHamilton", "Hamilton", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SouthTama", "Tama", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("SpiritLake", "Spirit Lake", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("St.Ansgar", "St. Ansgar", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("TwinCedars", "Cedar", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("VanBuren", "Van Buren", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("VanMeter", "Van Meter", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("WestDesMoines", "Des Moines", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("WestMarshall", "Marshall", cleaniowacounties_df$District)
+cleaniowacounties_df$District <- gsub("WesternDubuque", "Dubuque", cleaniowacounties_df$District)
+
+cleaniowacounties_df_done <- cleaniowacounties_df
+```
+
+```{r}
+cleania_c_count <- cleaniowacounties_df %>%
+  count(District)
+```
+
+```{r}
+colnames(cleania_c_count)[colnames(cleania_c_count) == "District"] <- "NAME"
+```
+
+```{r}
+iowa_sort <- iowa[order(iowa$NAME), ]
+```
+
+```{r}
+iowa_fullsort <- merge(iowa_sort, cleania_c_count, by = "NAME", all.x = TRUE)
+```
+
+Now let's graph Iowa:
+
+```{r}
+my_colors <- brewer.pal(9, "Reds")
+my_colors <- colorRampPalette(my_colors)(30)
+class_of_ia_county <- cut(iowa_fullsort$n, 30)
+my_colors <- my_colors[as.numeric(class_of_ia_county)]
+plot(st_geometry(iowa_fullsort), col = my_colors, bg = "#A6CAE0")
+```
+
+Tada! We can see that once again, it's a select few counties that are skewing the data (looking at you, Des Moines). But this is noteworthy: the majority of the state does not have data; those select few just have so many banned, it overpowers the others.
+
+But sheesh: you would think a state with "our liberties we prize" in their motto would let kids read what they want.
+
+# Participation 
